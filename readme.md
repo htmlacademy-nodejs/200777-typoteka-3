@@ -1,7 +1,7 @@
 # Личный проект «Типотека» [![Build status][travis-image]][travis-url]
 
 * Студент: [Александр Целковников](https://up.htmlacademy.ru/nodejs/3/user/200777).
-* Наставник: `Неизвестно`.
+* Наставник: [Олег Поляков](https://up.htmlacademy.ru/nodejs/3/user/1296165).
 
 ---
 
