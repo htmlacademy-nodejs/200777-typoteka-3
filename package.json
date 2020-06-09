@@ -1,0 +1,24 @@
+{
+  "name": "200777-typoteka-3",
+  "version": "1.0.0",
+  "description": "\"Типотека\"",
+  "main": "./src/service/service.js",
+  "scripts": {
+    "test": "npm run eslint",
+    "eslint": "eslint --ext .js src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leks511/200777-typoteka-3.git"
+  },
+  "author": "Alexander Tselkovnikov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Leks511/200777-typoteka-3/issues"
+  },
+  "homepage": "https://github.com/Leks511/200777-typoteka-3#readme",
+  "devDependencies": {
+    "eslint": "7.2.0",
+    "eslint-config-htmlacademy": "0.5.2"
+  }
+}
