@@ -1,7 +1,7 @@
 # Личный проект «Типотека» [![Build status][travis-image]][travis-url]
 
 * Студент: [Александр Целковников](https://up.htmlacademy.ru/nodejs/3/user/200777).
-* Наставник: [Юрий Кучма](https://htmlacademy.ru/profile/krabaton).
+* Наставник: [Юрий Кучма](https://up.htmlacademy.ru/nodejs/3/user/74996).
 
 ---
 
