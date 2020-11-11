@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Leks511/200777-typoteka-3#readme",
   "devDependencies": {
+    "chalk": "4.1.0",
     "eslint": "7.2.0",
     "eslint-config-htmlacademy": "0.5.2"
   }
