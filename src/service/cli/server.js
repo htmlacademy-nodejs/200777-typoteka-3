@@ -4,7 +4,7 @@ const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 const http = require(`http`);
 
-const {HttpCode} = require("../../constants");
+const {HttpCode} = require(`../../constants`);
 
 const DEFAULT_PORT = 3000;
 const FILE_NAME = `mocks.json`;
