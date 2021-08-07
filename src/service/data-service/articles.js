@@ -13,7 +13,7 @@ class ArticlesService {
   }
 
   findOne(id) {
-    return this._articles.fiter((item) => item.id === id);
+    return this._articles.find((item) => item.id === id);
   }
 
   create(article) {

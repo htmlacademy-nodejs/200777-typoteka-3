@@ -92,7 +92,7 @@ module.exports = (app, articlesService, commentsService) => {
       .json(deletedArticle);
   });
 
-  route.delete(`/:articleId/comments/commentId`, articleExists(articlesService), (req, res) => {
+  route.delete(`/:articleId/comments/:commentId`, articleExists(articlesService), (req, res) => {
     const {article} = res.locals;
     const {commentId} = req.params;
     const deletedComment = commentsService.drop(article, commentId);

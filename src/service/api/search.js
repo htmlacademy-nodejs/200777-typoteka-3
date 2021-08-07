@@ -7,7 +7,7 @@ const route = new Router();
 
 module.exports = (app, service) => {
 
-  app.use(`/search?=`, route);
+  app.use(`/search`, route);
 
   route.get(`/`, (req, res) => {
     const {query = ``} = req.query;
@@ -19,7 +19,7 @@ module.exports = (app, service) => {
     }
 
     const searchResults = service.findAll(query);
-    const searchStatus = searchResults ? HttpCode.OK : HttpCode.NOT_FOUND;
+    const searchStatus = searchResults.length > 0 ? HttpCode.OK : HttpCode.NOT_FOUND;
 
     return res
       .status(searchStatus)

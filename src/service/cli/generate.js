@@ -54,8 +54,8 @@ const generateOffers = (count, {titles, categories, sentences, comments}) => (
     id: getRandomId(MAX_ID_LENGTH),
     title: titles[getRandomInt(0, titles.length - 1)],
     createdDate: getRandomDate(),
-    announce: shuffle(sentences).slice(0, 5),
-    fullText: shuffle(sentences).slice(0, getRandomInt(1, sentences.length - 1)),
+    announce: shuffle(sentences).slice(0, 5).join(` `),
+    fullText: shuffle(sentences).slice(0, getRandomInt(1, sentences.length - 1)).join(` `),
     category: shuffle(categories).slice(0, getRandomInt(1, 3)),
     comments: generateComments(getRandomInt(1, MAX_COMMENTS_COUNT), comments)
   }))
