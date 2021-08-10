@@ -1,0 +1,63 @@
+
+GET http://localhost:8000/api/categories HTTP/1.1
+
+###
+
+GET http://localhost:8000/api/articles/ HTTP/1.1
+
+###
+
+GET http://localhost:8000/api/articles/vKutDW HTTP/1.1
+
+###
+
+GET http://localhost:8000/api/articles/vKutDW/comments HTTP/1.1
+
+###
+
+GET http://localhost:8000/api/search?query=начать HTTP/1.1
+
+###
+
+POST http://localhost:8000/api/articles HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "Новое объявление",
+  "createdDate": "2021-7-7 15:59:9",
+  "announce": "Вступительные слова",
+  "fullText": "Это большой длинный текст новой статьи",
+  "category": ["IT"]
+}
+
+
+###
+
+POST http://localhost:8000/api/articles/vKutDW/comments HTTP/1.1
+Content-Type: application/json
+
+{
+  "text": "Новый комментарий!"
+}
+
+###
+
+PUT http://localhost:8000/api/articles/iZa22l HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "Уже начали программировать",
+  "createdDate": "2021-7-6 15:59:9",
+  "announce": "Пока тишина",
+  "fullText": "Много много слов",
+  "category": ["IT"]
+}
+
+###
+
+DELETE http://localhost:8000/api/articles/SnQpPt HTTP/1.1
+
+###
+
+DELETE http://localhost:8000/api/articles/vKutDW/comments/efPZ9h HTTP/1.1
+
