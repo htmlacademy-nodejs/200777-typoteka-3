@@ -20,7 +20,7 @@ const app = new Router();
   const mockData = await getMockData();
 
   categories(app, new CategoriesService(mockData));
-  articles(app, new ArticlesService(mockData), new CommentsService(mockData));
+  articles(app, new ArticlesService(mockData), new CommentsService());
   search(app, new SearchService(mockData));
 })();
 
