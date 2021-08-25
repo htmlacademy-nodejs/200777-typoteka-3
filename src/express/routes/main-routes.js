@@ -6,9 +6,9 @@ const api = require(`../api`).getAPI();
 const mainRouter = new Router();
 
 mainRouter.get(`/`, async (req, res) => {
-  const articles = await api.getArticles();
+  // const articles = await api.getArticles();
 
-  res.render(`main`, {articles});
+  res.render(`main`);
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));

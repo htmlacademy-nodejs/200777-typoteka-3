@@ -3,6 +3,8 @@
 const express = require(`express`);
 const path = require(`path`);
 
+const {HttpCode} = require(`../constants`);
+
 const mainRoutes = require(`./routes/main-routes`);
 const myRoutes = require(`./routes/my-routes`);
 const articlesRoutes = require(`./routes/articles-routes`);
@@ -24,11 +26,11 @@ app.use(`/my`, myRoutes);
 app.use(`/articles`, articlesRoutes);
 
 
-app.use((req, res) => res.status(404).render(`errors/404`));
+app.use((req, res) => res.status(HttpCode.NOT_FOUND).render(`errors/404`));
 app.use((err, req, res, _next) => {
   console.log(err.message);
 
-  res.status(500).render(`errors/500`);
+  res.status(HttpCode.INTERNAL_SERVER_ERROR).render(`errors/500`);
 });
 
 app.listen(DEFAULT_PORT, () => console.log(`Сервер работает на ${DEFAULT_PORT}`));
