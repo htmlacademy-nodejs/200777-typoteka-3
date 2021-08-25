@@ -25,6 +25,10 @@ app.use(`/articles`, articlesRoutes);
 
 
 app.use((req, res) => res.status(404).render(`errors/404`));
-app.use((err, req, res, _next) => res.status(404).render(`errors/500`));
+app.use((err, req, res, _next) => {
+  console.log(err.message);
+
+  res.status(500).render(`errors/500`);
+});
 
 app.listen(DEFAULT_PORT, () => console.log(`Сервер работает на ${DEFAULT_PORT}`));
