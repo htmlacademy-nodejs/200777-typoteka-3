@@ -12,7 +12,6 @@ myRouter.get(`/`, async (req, res) => {
 
 myRouter.get(`/comments`, async (req, res) => {
   const articles = await api.getArticles();
-  console.log(articles[0].comments);
 
   res.render(`comments`, {comments: articles[1].comments});
 });

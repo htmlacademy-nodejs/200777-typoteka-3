@@ -38,7 +38,7 @@ class API {
 
   async createArticle(data) {
     return this._load(`/articles`, {
-      methond: `POST`,
+      method: `POST`,
       data
     });
   }

@@ -5,7 +5,6 @@ const chalk = require(`chalk`);
 const {nanoid} = require(`nanoid`);
 
 const {getRandomInt, shuffle} = require(`../../utils`);
-const {ExitCode} = require(`../../constants`);
 
 const DEFAULT_COUNT = 1;
 const MAX_COUNT = 1000;
@@ -57,6 +56,7 @@ const generateOffers = (count, {titles, categories, sentences, comments}) => (
     announce: shuffle(sentences).slice(0, 5).join(` `),
     fullText: shuffle(sentences).slice(0, getRandomInt(1, sentences.length - 1)).join(` `),
     category: shuffle(categories).slice(0, getRandomInt(1, 3)),
+    picture: ``,
     comments: generateComments(getRandomInt(1, MAX_COMMENTS_COUNT), comments)
   }))
 );
@@ -77,7 +77,7 @@ module.exports = {
 
     if (countOffer > MAX_COUNT) {
       console.error(chalk.red(`Не больше ${MAX_COUNT} объявлений`));
-      process.exit(ExitCode.error);
+      return;
     }
 
     const content = JSON.stringify(generateOffers(countOffer, mockData));
@@ -85,10 +85,8 @@ module.exports = {
     try {
       await fs.writeFile(FILE_NAME, content);
       console.log(chalk.green(`Operation success. File created.`));
-      process.exit(ExitCode.success);
     } catch (err) {
       console.error(chalk.red(`Can't write data to file...`));
-      process.exit(ExitCode.error);
     }
   }
 };

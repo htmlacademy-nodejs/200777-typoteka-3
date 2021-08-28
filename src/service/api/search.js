@@ -13,15 +13,17 @@ module.exports = (app, service) => {
     const {query = ``} = req.query;
 
     if (!query) {
-      return res
+      res
         .status(HttpCode.BAD_REQUEST)
         .json([]);
+
+      return;
     }
 
     const searchResults = service.findAll(query);
     const searchStatus = searchResults.length > 0 ? HttpCode.OK : HttpCode.NOT_FOUND;
 
-    return res
+    res
       .status(searchStatus)
       .json(searchResults);
   });
