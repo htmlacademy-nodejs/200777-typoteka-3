@@ -1,12 +1,40 @@
 'use strict';
 
 const {Router} = require(`express`);
+const {HttpCode} = require(`../../constants`);
+const api = require(`../api`).getAPI();
+
 const mainRouter = new Router();
 
-mainRouter.get(`/`, (req, res) => res.render(`main`));
+mainRouter.get(`/`, async (req, res) => {
+  const data = await api.getArticles();
+  const articles = data.reverse();
+
+  res.render(`main`, {articles});
+});
+
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
 mainRouter.get(`/login`, (req, res) => res.render(`login`));
-mainRouter.get(`/search`, (req, res) => res.render(`search`));
+
+mainRouter.get(`/search`, async (req, res) => {
+  try {
+    const {search} = req.query;
+    const results = await api.search(search);
+    res.render(`search`, {results});
+  } catch (error) {
+    switch (error.response.status) {
+
+      case HttpCode.NOT_FOUND:
+        res.render(`search`, {results: []});
+        break;
+
+      default:
+        res.render(`search`, {results: false});
+        break;
+    }
+  }
+});
+
 mainRouter.get(`/categories`, (req, res) => res.render(`all-categories`));
 
 module.exports = mainRouter;

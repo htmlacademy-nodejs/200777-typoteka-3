@@ -353,11 +353,7 @@ describe(`API correctly deletes an article`, () => {
 
   test(`Articles count is 4 now`, () => request(app)
     .get(`/articles`)
-    .expect((res) => {
-      console.log(res.body);
-
-      return expect(res.body.length).toBe(4);
-    }));
+    .expect((res) => expect(res.body.length).toBe(4)));
 });
 
 

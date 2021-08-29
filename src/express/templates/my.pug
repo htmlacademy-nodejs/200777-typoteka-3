@@ -1,0 +1,13 @@
+extends layout.pug
+
+block content
+  main.main-page.main-page--padding
+    section.main-page__notes.notes
+      h1.notes__title Мои записи
+      ul.notes__list
+        each article, index in articles
+          li.notes__list-item(class=articles.length === ++index ? `notes__list-item--last` : ``)
+            time.notes__item-time(datetime=article.createdDate) #{article.createdDate}
+            a.notes__item-text(href='#') #{article.title}
+            button.notes__button.button.button--close-item(type='button')
+              span.visually-hidden Закрыть строку списка
