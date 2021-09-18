@@ -53,8 +53,8 @@ const generateArticles = (count, titles, sentences, comments, categoryCount, use
   Array(count).fill({}).map((_, index) => ({
     title: titles[getRandomInt(0, titles.length - 1)],
     createdDate: getRandomDate(),
-    announce: shuffle(sentences).slice(1, getRandomInt(2, 4)).join(` `),
-    fullText: shuffle(sentences).slice(1, getRandomInt(2, sentences.length - 1)).join(` `),
+    announce: shuffle(sentences).slice(1, 2).join(` `),
+    fullText: shuffle(sentences).slice(1, 4).join(` `),
     category: [getRandomInt(1, categoryCount)],
     picture: Math.random() > 0.5 ? ARTICLE_PICTURE_SRC : ``,
     comments: generateComments(getRandomInt(1, MAX_COMMENTS_COUNT), comments, index + 1, userCount),
@@ -109,18 +109,12 @@ module.exports = {
     const categoryValues = categories.map((name) => `('${name}')`).join(`,\n`);
 
     const articleValues = articles.map(
-        ({title, createdDate, picture, fullText, announce, userId}) => `(
-          title: '${title}',
-          createdDate: '${createdDate}',
-          picture: '${picture}',
-          full_text: '${fullText}',
-          announce: '${announce}',
-          userId: '${userId}')`
+        ({title, createdDate, picture, fullText, announce, userId}) => `('${title}', '${createdDate}', '${picture}', '${fullText}', '${announce}', ${userId})`
     ).join(`,\n`);
 
-    const articleCategoryValues = articleCategories.map(({articleId, categoryId}) => `('${articleId}', '${categoryId}')`).join(`,\n`);
+    const articleCategoryValues = articleCategories.map(({articleId, categoryId}) => `(${articleId}, ${categoryId})`).join(`,\n`);
 
-    const commentValues = comments.map(({text, userId, articleId}) => `('${text}', '${userId}', '${articleId}')`).join(`,\n`);
+    const commentValues = comments.map(({text, userId, articleId}) => `('${text}', ${userId}, ${articleId})`).join(`,\n`);
 
     const content = `
     -- Запрос на заполнение users пользователями
@@ -134,19 +128,19 @@ module.exports = {
     -- Запрос на заполнение articles статьями
     ALTER TABLE articles DISABLE TRIGGER ALL;
     INSERT INTO articles(title, created_at, picture, full_text, announce, user_id) VALUES
-    ${articleValues}
+    ${articleValues};
     ALTER TABLE articles ENABLE TRIGGER ALL;
     
     -- Запрос на создание связей между каждой статьёй из articles с категориями
     ALTER TABLE articles_categories DISABLE TRIGGER ALL;
     INSERT INTO articles_categories(article_id, category_id) VALUES
-    ${articleCategoryValues}
-    ALTER TABLE article_categories ENABLE TRIGGER ALL;
+    ${articleCategoryValues};
+    ALTER TABLE articles_categories ENABLE TRIGGER ALL;
     
     -- Запрос на создание комментариев к статьям articles
     ALTER TABLE comments DISABLE TRIGGER ALL;
-    INSERT INTO COMMENTS(text, user_id, article_id) VALUES
-    ${commentValues}
+    INSERT INTO comments(text, user_id, article_id) VALUES
+    ${commentValues};
     ALTER TABLE comments ENABLE TRIGGER ALL;`;
 
     try {
