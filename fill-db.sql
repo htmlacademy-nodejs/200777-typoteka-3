@@ -27,14 +27,14 @@
     ALTER TABLE articles ENABLE TRIGGER ALL;
     
     -- Запрос на создание связей между каждой статьёй из articles с категориями
-    ALTER TABLE articles_categories DISABLE TRIGGER ALL;
-    INSERT INTO articles_categories(article_id, category_id) VALUES
+    ALTER TABLE article_categories DISABLE TRIGGER ALL;
+    INSERT INTO article_categories(article_id, category_id) VALUES
     (1, 7),
 (2, 5),
 (3, 9),
 (4, 9),
 (5, 7);
-    ALTER TABLE articles_categories ENABLE TRIGGER ALL;
+    ALTER TABLE article_categories ENABLE TRIGGER ALL;
     
     -- Запрос на создание комментариев к статьям articles
     ALTER TABLE comments DISABLE TRIGGER ALL;
