@@ -1,22 +1,19 @@
 'use strict';
 
-const Aliase = require(`../models/aliase`);
+const Alias = require(`../models/alias`);
 
 class ArticlesService {
   constructor(sequelize) {
-    this._Article = sequelize.model.Article;
-    this._Comment = sequelize.model.Comment;
-    this._Category = sequelize.model.Category;
+    this._Article = sequelize.models.Article;
+    this._Comment = sequelize.models.Comment;
+    this._Category = sequelize.models.Category;
   }
 
-  async findAll(needComments) {
-    const include = [Aliase.CATEGORIES];
+  // Загрузить статьи с кол-вом комментариев
+  async findAll() {
+    const include = [Alias.CATEGORIES, Alias.COMMENTS];
 
-    if (needComments) {
-      include.push(Aliase.COMMENTS);
-    }
-
-    const articles = this._Article.findAll({
+    const articles = await this._Article.findAll({
       include,
       order: [
         [`createdAt`, `DESC`]
@@ -26,8 +23,14 @@ class ArticlesService {
     return articles.map((article) => article.get());
   }
 
-  findOne(id) {
-    return this._Article.findByPk(id, {include: Aliase.CATEGORIES});
+  async findOne(id, needComments) {
+    const include = [Alias.CATEGORIES];
+
+    if (needComments) {
+      include.push(Alias.COMMENTS);
+    }
+
+    return await this._Article.findByPk(id, {include});
   }
 
   async create(articleData) {

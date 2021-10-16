@@ -26,10 +26,9 @@ const upload = multer({storage});
 
 articlesRouter.get(`/add`, async (req, res) => {
   const categories = await api.getCategories();
-  const categoriesList = categories.map((item) => ({
-    name: item,
+  const categoriesList = categories.map((category) => ({
     checked: false,
-    id: nanoid(10)
+    ...category
   }));
 
   res.render(`articles/post`, {categoriesList});
@@ -43,7 +42,7 @@ articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
     createdDate: body.date,
     announce: body.announcement,
     fullText: body[`full-text`],
-    category: Object.keys(body.category),
+    categories: Object.keys(body.categories),
     picture: file ? file.filename : ``
   };
 
@@ -55,7 +54,8 @@ articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
   }
 });
 
-articlesRouter.get(`/category/:id`, (req, res) => res.render(`articles/articles-by-category`));
+articlesRouter.get(`/category/:categoryId`,
+    (req, res) => res.render(`articles/articles-by-category`));
 
 articlesRouter.get(`/edit/:id`, async (req, res) => {
   const {id} = req.params;
@@ -64,18 +64,19 @@ articlesRouter.get(`/edit/:id`, async (req, res) => {
     api.getCategories()
   ]);
 
-  const categoriesList = categories.map((item) => ({
-    name: item,
-    checked: article.category.includes(item),
-    id: nanoid(10)
+  const categoriesList = categories.map((category) => ({
+    checked: article.categories
+      .map((item) => item.id)
+      .includes(category.id),
+    ...category
   }));
 
   res.render(`articles/post`, {article, categoriesList});
 });
 
-articlesRouter.get(`/:id`, (req, res) => {
+articlesRouter.get(`/:id`, async (req, res) => {
   const {id} = req.params;
-  const article = api.getArticle(id);
+  const article = await api.getArticle(id, true);
 
   res.render(`articles/post-detail`, {article});
 });

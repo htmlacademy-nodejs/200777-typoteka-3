@@ -22,7 +22,7 @@ block content
             if results.length
               each article in results
                 .search__result
-                  time.search__date(datetime=article.createdDate) #{article.createdDate}
+                  +formatTimeTag(article)(class=`search__date`)
                   a.search__link
                     | #{article.title}
       else

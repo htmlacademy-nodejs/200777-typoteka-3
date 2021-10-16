@@ -24,19 +24,19 @@ class API {
     return this._load(`/articles`);
   }
 
-  getArticle(id) {
-    return this._load(`/articles/${id}`);
+  getArticle(id, needComments) {
+    return this._load(`/articles/${id}`, {params: {needComments}});
   }
 
   search(query) {
     return this._load(`/search`, {params: {query}});
   }
 
-  async getCategories() {
-    return this._load(`/categories`);
+  getCategories(count) {
+    return this._load(`/categories`, {params: {count}});
   }
 
-  async createArticle(data) {
+  createArticle(data) {
     return this._load(`/articles`, {
       method: `POST`,
       data

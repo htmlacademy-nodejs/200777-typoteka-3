@@ -6,8 +6,8 @@ class CommentsService {
     this._Comment = sequelize.models.Comment;
   }
 
-  findAll(articleId) {
-    return this._Comment.findAll({
+  async findAll(articleId) {
+    return await this._Comment.findAll({
       where: {articleId},
       raw: true
     });

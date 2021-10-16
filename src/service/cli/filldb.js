@@ -17,8 +17,6 @@ const FILE_CATEGORIES_PATH = `./data/categories.txt`;
 const FILE_SENTENCES_PATH = `./data/sentences.txt`;
 const FILE_COMMENTS_PATH = `./data/comments.txt`;
 
-const ARTICLE_PICTURE_SRC = `https://picsum.photos/200`;
-
 const logger = getLogger({});
 
 const readContent = async (filePath) => {
@@ -43,13 +41,15 @@ const generateComments = (count, comments) => (
   }))
 );
 
+const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
+
 const generateArticles = (count, titles, categories, sentences, comments) => (
   Array(count).fill({}).map(() => ({
     title: titles[getRandomInt(0, titles.length - 1)],
     announce: shuffle(sentences).slice(0, 5).join(` `),
     fullText: shuffle(sentences).slice(0, getRandomInt(1, sentences.length - 1)).join(` `),
     categories: shuffle(categories).slice(0, getRandomInt(1, 3)),
-    picture: Math.random() > 0.5 ? ARTICLE_PICTURE_SRC : ``,
+    picture: Math.random() > 0.5 ? getPictureFileName(getRandomInt(1, 3)) : ``,
     comments: generateComments(getRandomInt(1, MAX_COMMENTS_COUNT), comments)
   }))
 );
