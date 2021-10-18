@@ -9,7 +9,6 @@ class ArticlesService {
     this._Category = sequelize.models.Category;
   }
 
-  // Загрузить статьи с кол-вом комментариев
   async findAll() {
     const include = [Alias.CATEGORIES, Alias.COMMENTS];
 
@@ -40,7 +39,7 @@ class ArticlesService {
   }
 
   async drop(id) {
-    const deletedRows = this._Article.destroy({
+    const deletedRows = await this._Article.destroy({
       where: {id}
     });
     return !!deletedRows;

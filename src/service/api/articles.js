@@ -112,7 +112,7 @@ module.exports = (app, articlesService, commentsService) => {
 
   route.delete(`/:articleId/comments/:commentId`, articleExists(articlesService), async (req, res) => {
     const {commentId} = req.params;
-    const deleted = commentsService.drop(commentId);
+    const deleted = await commentsService.drop(commentId);
 
     if (!deleted) {
       return res

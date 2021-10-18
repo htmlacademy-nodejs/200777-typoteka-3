@@ -14,14 +14,14 @@ class CommentsService {
   }
 
   async create(articleId, comment) {
-    return this._Comment.create({
+    return await this._Comment.create({
       articleId,
       ...comment
     });
   }
 
   async drop(id) {
-    const deletedRows = this._Comment.destroy({
+    const deletedRows = await this._Comment.destroy({
       where: {id}
     });
     return !!deletedRows;
