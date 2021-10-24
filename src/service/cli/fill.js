@@ -3,76 +3,48 @@
 const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 
-const {getRandomInt, shuffle} = require(`../../utils`);
+const {
+  getRandomInt,
+  shuffle,
+  readContent,
+  getPictureFileName
+} = require(`../../utils`);
 
-const DEFAULT_COUNT = 1;
-const MAX_COUNT = 1000;
-const MAX_COMMENTS_COUNT = 4;
+const {
+  FilePath,
+  ArticlesCount,
+  AnnounceRestrict,
+  FullTextRestrict,
+  PictureRestrict,
+  CommentsCountRestrict,
+  CommentSentencesMaxCount,
+  USER_ID_MIN,
+  CATEGORY_MIN_COUNT,
+  COMMENT_SENTENCES_MIN_COUNT
+} = require(`../../constants`);
+
+const {generateArticles} = require(`../../generate-articles`);
+
 const FILE_NAME = `fill-db.sql`;
-
-const FILE_TITLES_PATH = `./data/titles.txt`;
-const FILE_CATEGORIES_PATH = `./data/categories.txt`;
-const FILE_SENTENCES_PATH = `./data/sentences.txt`;
-const FILE_COMMENTS_PATH = `./data/comments.txt`;
-
-const readContent = async (filePath) => {
-  try {
-    const content = await fs.readFile(filePath, `utf8`);
-    return content
-      .trim()
-      .split(`\n`)
-      .map((str) => str.trim())
-      .filter((str) => str.length);
-  } catch (err) {
-    console.error(chalk.red(err));
-    return [];
-  }
-};
-
-const getRandomDate = () => {
-  const date = new Date();
-
-  date.setDate(date.getDate() - getRandomInt(0, 7));
-
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-};
-
-const generateComments = (count, comments, articleId, userCount) => (
-  Array(count).fill({}).map(() => ({
-    userId: getRandomInt(1, userCount),
-    articleId,
-    text: shuffle(comments)
-      .slice(0, getRandomInt(1, 3))
-      .join(` `)
-  }))
-);
-
-const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
-
-const generateArticles = (count, titles, sentences, comments, categoryCount, userCount) => (
-  Array(count).fill({}).map((_, index) => ({
-    title: titles[getRandomInt(0, titles.length - 1)],
-    createdDate: getRandomDate(),
-    announce: shuffle(sentences).slice(1, 2).join(` `),
-    fullText: shuffle(sentences).slice(1, 4).join(` `),
-    category: [getRandomInt(1, categoryCount)],
-    picture: Math.random() > 0.5 ? getPictureFileName(getRandomInt(1, 3)) : ``,
-    comments: generateComments(getRandomInt(1, MAX_COMMENTS_COUNT), comments, index + 1, userCount),
-    userId: getRandomInt(1, userCount)
-  }))
-);
 
 module.exports = {
   name: `--fill`,
   async run(args) {
 
-    const titles = await readContent(FILE_TITLES_PATH);
-    const categories = await readContent(FILE_CATEGORIES_PATH);
-    const sentences = await readContent(FILE_SENTENCES_PATH);
-    const commentSentences = await readContent(FILE_COMMENTS_PATH);
+    const [
+      titles,
+      categories,
+      sentences,
+      commentSentences
+    ] = await Promise.all([
+      readContent(FilePath.TITLES),
+      readContent(FilePath.CATEGORIES),
+      readContent(FilePath.SENTENCES),
+      readContent(FilePath.COMMENTS)
+    ]);
 
     const [count] = args;
-    const countArticles = Number.parseInt(count, 10) || DEFAULT_COUNT;
+    const countArticles = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
 
     const users = [
       {
@@ -91,16 +63,39 @@ module.exports = {
     ];
 
 
-    if (countArticles > MAX_COUNT) {
-      console.error(chalk.red(`Не больше ${MAX_COUNT} объявлений`));
+    if (countArticles > ArticlesCount.MAX) {
+      console.error(chalk.red(`Не больше ${ArticlesCount.MAX} объявлений`));
       return;
     }
 
-    const articles = generateArticles(countArticles, titles, sentences, commentSentences, categories.length, users.length);
+
+    const articles = generateArticles(
+        countArticles,
+        titles,
+        sentences,
+        commentSentences,
+        categories.length,
+        users.length,
+        {
+          getRandomInt,
+          shuffle,
+          getPictureFileName
+        },
+        {
+          AnnounceRestrict,
+          FullTextRestrict,
+          PictureRestrict,
+          CommentsCountRestrict,
+          CommentSentencesMaxCount,
+          USER_ID_MIN,
+          CATEGORY_MIN_COUNT,
+          COMMENT_SENTENCES_MIN_COUNT
+        }
+    );
 
     const comments = articles.flatMap((article) => article.comments);
 
-    const articleCategories = articles.map((article, index) => ({articleId: index + 1, categoryId: article.category[0]}));
+    const articleCategories = articles.map((article, index) => ({articleId: index + 1, categoryId: article.categories[0]}));
 
     const userValues = users.map(
         ({email, passwordHash, firstName, lastName, avatar}) => `('${email}', '${passwordHash}', '${firstName}', '${lastName}', '${avatar}')`)
@@ -109,7 +104,7 @@ module.exports = {
     const categoryValues = categories.map((name) => `('${name}')`).join(`,\n`);
 
     const articleValues = articles.map(
-        ({title, createdDate, picture, fullText, announce, userId}) => `('${title}', '${createdDate}', '${picture}', '${fullText}', '${announce}', ${userId})`
+        ({title, picture, fullText, announce, userId}) => `('${title}', '${picture}', '${fullText}', '${announce}', ${userId})`
     ).join(`,\n`);
 
     const articleCategoryValues = articleCategories.map(({articleId, categoryId}) => `(${articleId}, ${categoryId})`).join(`,\n`);

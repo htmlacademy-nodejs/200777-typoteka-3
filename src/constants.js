@@ -21,4 +21,36 @@ module.exports.Env = {
   DEVELOPMENT: `development`,
   PRODUCTION: `production`,
 };
-
+module.exports.FilePath = {
+  TITLES: `./data/titles.txt`,
+  CATEGORIES: `./data/categories.txt`,
+  SENTENCES: `./data/sentences.txt`,
+  COMMENTS: `./data/comments.txt`
+};
+module.exports.ArticlesCount = {
+  DEFAULT: 1,
+  MAX: 1000
+};
+module.exports.AnnounceRestrict = {
+  MIN: 1,
+  MAX: 2
+};
+module.exports.FullTextRestrict = {
+  MIN: 1,
+  MAX: 4
+};
+module.exports.PictureRestrict = {
+  MIN: 1,
+  MAX: 3
+};
+module.exports.CommentsCountRestrict = {
+  MIN: 1,
+  MAX: 4
+};
+module.exports.CommentSentencesMaxCount = {
+  MIN: 1,
+  MAX: 3
+};
+module.exports.COMMENT_SENTENCES_MIN_COUNT = 1;
+module.exports.CATEGORY_MIN_COUNT = 1;
+module.exports.USER_ID_MIN = 1;

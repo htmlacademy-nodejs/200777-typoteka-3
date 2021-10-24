@@ -1,56 +1,45 @@
 'use strict';
 
-const fs = require(`fs`).promises;
-
-const {getRandomInt, shuffle} = require(`../../utils`);
-const {ExitCode} = require(`../../constants`);
-
 const sequelize = require(`../lib/sequelize`);
 const {getLogger} = require(`../lib/logger`);
 const initDatabase = require(`../lib/init-db`);
 
-const DEFAULT_COUNT = 1;
-const MAX_COMMENTS_COUNT = 4;
-
-const FILE_TITLES_PATH = `./data/titles.txt`;
-const FILE_CATEGORIES_PATH = `./data/categories.txt`;
-const FILE_SENTENCES_PATH = `./data/sentences.txt`;
-const FILE_COMMENTS_PATH = `./data/comments.txt`;
-
 const logger = getLogger({});
 
-const readContent = async (filePath) => {
-  try {
-    const content = await fs.readFile(filePath, `utf8`);
-    return content
-      .trim()
-      .split(`\n`)
-      .map((str) => str.trim())
-      .filter((str) => str.length);
-  } catch (err) {
-    logger.error(`Error when reading file: ${err.message}`);
-    return [];
-  }
-};
+const {
+  getRandomInt,
+  shuffle,
+  readContent,
+  generateComments,
+  getPictureFileName
+} = require(`../../utils`);
 
-const generateComments = (count, comments) => (
-  Array(count).fill({}).map(() => ({
-    text: shuffle(comments)
-      .slice(0, getRandomInt(1, 3))
-      .join(` `)
-  }))
-);
+const {
+  ExitCode,
+  FilePath,
+  ArticlesCount,
+  AnnounceRestrict,
+  FullTextRestrict,
+  PictureRestrict,
+  CommentsRestrict
+} = require(`../../constants`);
 
-const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
 
-const generateArticles = (count, titles, categories, sentences, comments) => (
-  Array(count).fill({}).map(() => ({
+const generateArticles = (count, titles, sentences, comments, categoryCount, userCount) => (
+  Array(count).fill({}).map((_, index) => ({
     title: titles[getRandomInt(0, titles.length - 1)],
-    announce: shuffle(sentences).slice(0, 5).join(` `),
-    fullText: shuffle(sentences).slice(0, getRandomInt(1, sentences.length - 1)).join(` `),
-    categories: shuffle(categories).slice(0, getRandomInt(1, 3)),
-    picture: Math.random() > 0.5 ? getPictureFileName(getRandomInt(1, 3)) : ``,
-    comments: generateComments(getRandomInt(1, MAX_COMMENTS_COUNT), comments)
+    announce: shuffle(sentences).slice(AnnounceRestrict.MIN, AnnounceRestrict.MAX).join(` `),
+    fullText: shuffle(sentences).slice(FullTextRestrict.MIN, FullTextRestrict.MAX).join(` `),
+    categories: [getRandomInt(1, categoryCount)],
+    picture: Math.random() > 0.5 ? getPictureFileName(getRandomInt(PictureRestrict.MIN, PictureRestrict.MAX)) : ``,
+    comments: generateComments(
+        getRandomInt(CommentsRestrict.MIN, CommentsRestrict.MAX),
+        comments,
+        index + 1,
+        userCount,
+        {getRandomInt, shuffle}
+    ),
+    userId: getRandomInt(1, userCount)
   }))
 );
 
@@ -66,15 +55,22 @@ module.exports = {
     }
     logger.info(`Connection to database established`);
 
-    const titles = await readContent(FILE_TITLES_PATH);
-    const categories = await readContent(FILE_CATEGORIES_PATH);
-    const sentences = await readContent(FILE_SENTENCES_PATH);
-    const comments = await readContent(FILE_COMMENTS_PATH);
+    const [
+      titles,
+      categories,
+      sentences,
+      commentSentences
+    ] = await Promise.all([
+      readContent(FilePath.TITLES),
+      readContent(FilePath.CATEGORIES),
+      readContent(FilePath.SENTENCES),
+      readContent(FilePath.COMMENTS)
+    ]);
 
     const [count] = args;
-    const countArticle = Number.parseInt(count, 10) || DEFAULT_COUNT;
+    const countArticle = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
 
-    const articles = generateArticles(countArticle, titles, categories, sentences, comments);
+    const articles = generateArticles(countArticle, titles, categories, sentences, commentSentences);
 
     return initDatabase(sequelize, {categories, articles});
   }
