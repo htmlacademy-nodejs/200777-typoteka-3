@@ -51,6 +51,5 @@ module.exports.CommentSentencesMaxCount = {
   MIN: 1,
   MAX: 3
 };
-module.exports.COMMENT_SENTENCES_MIN_COUNT = 1;
 module.exports.CATEGORY_MIN_COUNT = 1;
 module.exports.USER_ID_MIN = 1;

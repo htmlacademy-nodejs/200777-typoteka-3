@@ -19,9 +19,10 @@ const {
   CommentsCountRestrict,
   CommentSentencesMaxCount,
   USER_ID_MIN,
-  CATEGORY_MIN_COUNT,
-  COMMENT_SENTENCES_MIN_COUNT
+  CATEGORY_MIN_COUNT
 } = require(`../../constants`);
+
+const users = require(`../../users`);
 
 const {generateArticles} = require(`../../generate-articles`);
 
@@ -45,22 +46,6 @@ module.exports = {
 
     const [count] = args;
     const countArticles = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
-
-    const users = [
-      {
-        email: `ivanov@example.com`,
-        passwordHash: `5f4dcc3b5aa765d61d8327deb882cf99`,
-        firstName: `Иван`,
-        lastName: `Иванов`,
-        avatar: `avatar1.jpg`
-      }, {
-        email: `petrov@example.com`,
-        passwordHash: `5f4dcc3b5aa765d61d8327deb882cf99`,
-        firstName: `Пётр`,
-        lastName: `Петров`,
-        avatar: `avatar2.jpg`
-      }
-    ];
 
 
     if (countArticles > ArticlesCount.MAX) {
@@ -89,7 +74,6 @@ module.exports = {
           CommentSentencesMaxCount,
           USER_ID_MIN,
           CATEGORY_MIN_COUNT,
-          COMMENT_SENTENCES_MIN_COUNT
         }
     );
 

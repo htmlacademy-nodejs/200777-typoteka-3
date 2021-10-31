@@ -10,7 +10,6 @@ const {
   getRandomInt,
   shuffle,
   readContent,
-  generateComments,
   getPictureFileName
 } = require(`../../utils`);
 
@@ -21,27 +20,15 @@ const {
   AnnounceRestrict,
   FullTextRestrict,
   PictureRestrict,
-  CommentsRestrict
+  CommentsCountRestrict,
+  CommentSentencesMaxCount,
+  USER_ID_MIN,
+  CATEGORY_MIN_COUNT
 } = require(`../../constants`);
 
+const users = require(`../../users`);
 
-const generateArticles = (count, titles, sentences, comments, categoryCount, userCount) => (
-  Array(count).fill({}).map((_, index) => ({
-    title: titles[getRandomInt(0, titles.length - 1)],
-    announce: shuffle(sentences).slice(AnnounceRestrict.MIN, AnnounceRestrict.MAX).join(` `),
-    fullText: shuffle(sentences).slice(FullTextRestrict.MIN, FullTextRestrict.MAX).join(` `),
-    categories: [getRandomInt(1, categoryCount)],
-    picture: Math.random() > 0.5 ? getPictureFileName(getRandomInt(PictureRestrict.MIN, PictureRestrict.MAX)) : ``,
-    comments: generateComments(
-        getRandomInt(CommentsRestrict.MIN, CommentsRestrict.MAX),
-        comments,
-        index + 1,
-        userCount,
-        {getRandomInt, shuffle}
-    ),
-    userId: getRandomInt(1, userCount)
-  }))
-);
+const {generateArticles} = require(`../../generate-articles`);
 
 module.exports = {
   name: `--filldb`,
@@ -68,9 +55,31 @@ module.exports = {
     ]);
 
     const [count] = args;
-    const countArticle = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
+    const countArticles = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
 
-    const articles = generateArticles(countArticle, titles, categories, sentences, commentSentences);
+
+    const articles = generateArticles(
+        countArticles,
+        titles,
+        sentences,
+        commentSentences,
+        categories.length,
+        users.length,
+        {
+          getRandomInt,
+          shuffle,
+          getPictureFileName
+        },
+        {
+          AnnounceRestrict,
+          FullTextRestrict,
+          PictureRestrict,
+          CommentsCountRestrict,
+          CommentSentencesMaxCount,
+          USER_ID_MIN,
+          CATEGORY_MIN_COUNT,
+        }
+    );
 
     return initDatabase(sequelize, {categories, articles});
   }

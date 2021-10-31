@@ -25,7 +25,7 @@ module.exports.generateArticles = (
       ...article,
       comments: createComments(
           commentSentences,
-          index++,
+          ++index,
           userCount,
           utilFunctions,
           restricts
