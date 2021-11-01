@@ -11,6 +11,24 @@ html(lang='ru')
     link(rel='preload' href='/fonts/SFProDisplay-Regular.woff2' as='font' crossorigin='anonymous')
     link(rel='stylesheet' href='/css/style.min.css')
   body
+    -
+      const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          return `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}, ${date.getHours()}:${date.getMinutes()}`;
+        };
+
+    mixin insertArticlePicture(article)
+      if article.picture
+        .post__picture
+          img(src=`/img/${article.picture}` alt='пейзаж море, скалы, пляж')
+
+    mixin isPictureExistsArticleClass(article)
+      li.preview__item(class=article.picture ? `` : `preview__item--noimage`)
+        block
+
+    mixin formatTimeTag(dataItem)
+      time(class!=attributes.class datetime=dataItem.createdAt) #{formatDate(dataItem.createdAt)}
+
     .wrapper
       include partials/header.pug
 

@@ -2,119 +2,114 @@
 
 const express = require(`express`);
 const request = require(`supertest`);
+const Sequelize = require(`sequelize`);
 
 const search = require(`./search`);
 const DataService = require(`../data-service/search`);
 const {HttpCode} = require(`../../constants`);
 
-const mockData = [
+const initDB = require(`../lib/init-db`);
+
+const mockCategories = [
+  `Музыка`,
+  `Разное`,
+  `Без рамки`,
+  `Программирование`
+];
+
+const mockArticles = [
   {
-    "id": `9fs9G4`,
     "title": `Лучшие рок-музыканты 20-века`,
-    "createdDate": `2021-7-14 21:28:27`,
     "announce": `Из под его пера вышло 8 платиновых альбомов. Простые ежедневные упражнения помогут достичь успеха.`,
     "fullText": `Достичь успеха помогут ежедневные повторения. Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
-    "category": [
-      `Кино`,
-      `Без рамки`,
-      `Железо`
+    "picture": ``,
+    "categories": [
+      `Музыка`,
+      `Разное`,
+      `Программирование`
     ],
     "comments": [
       {
-        "id": `mYSdvJ`,
         "text": `Хочу такую же футболку :-) Планируете записать видосик на эту тему? Совсем немного...`
       }
     ]
   },
   {
-    "id": `ZWY4HT`,
     "title": `Другой пост`,
-    "createdDate": `2021-7-14 21:28:27`,
     "announce": `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Бороться с прокрастинацией несложно.`,
     "fullText": `Этот смартфон — настоящая находка. Большой и яркий экран мощнейший процессор — всё это в небольшом гаджете. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле?`,
-    "category": [
-      `Кино`,
-      `IT`
+    "picture": `item03.jpg`,
+    "categories": [
+      `Музыка`,
+      `Без рамки`
     ],
     "comments": [
       {
-        "id": `uZER1F`,
         "text": `Хочу такую же футболку :-) Согласен с автором! Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       },
       {
-        "id": `6_7drh`,
         "text": `Хочу такую же футболку :-)`
       },
       {
-        "id": `ezAuxH`,
         "text": `Согласен с автором!`
       },
       {
-        "id": `pccJUX`,
         "text": `Это где ж такие красоты? Мне кажется или я уже читал это где-то? Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       }
     ]
   },
   {
-    "id": `nBmWx-`,
     "title": `Что такое золотое сечение`,
-    "createdDate": `2021-7-13 21:28:27`,
     "announce": `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
     "fullText": `Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Вы можете достичь всего. Стоит только немного постараться и запастись книгами.`,
-    "category": [
-      `Кино`,
-      `Без рамки`,
-      `Разное`
-    ],
+    "picture": ``,
+    "categories": [`Без рамки`],
     "comments": [
       {
-        "id": `0Sj3nl`,
         "text": `Хочу такую же футболку :-)`
       }
     ]
   },
   {
-    "id": `8znBfX`,
     "title": `Борьба с прокрастинацией`,
-    "createdDate": `2021-7-13 21:28:27`,
     "announce": `Первая большая ёлка была установлена только в 1938 году. Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Он написал больше 30 хитов.`,
     "fullText": `Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Из под его пера вышло 8 платиновых альбомов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-    "category": [
-      `За жизнь`
-    ],
+    "picture": `item02.jpg`,
+    "categories": [`Программирование`],
     "comments": [
       {
-        "id": `qsRg6e`,
         "text": `Хочу такую же футболку :-)`
       },
       {
-        "id": `yC_1Qa`,
         "text": `Планируете записать видосик на эту тему?`
       }
     ]
   },
   {
-    "id": `kK-2hs`,
     "title": `Как начать программировать`,
-    "createdDate": `2021-7-13 21:28:27`,
     "announce": `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
     "fullText": `Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Это один из лучших рок-музыкантов. Собрать камни бесконечности легко если вы прирожденный герой.`,
-    "category": [
-      `Деревья`,
-      `Разное`
-    ],
+    "picture": `item01.jpg`,
+    "categories": [`Программирование`, `Разное`],
     "comments": [
       {
-        "id": `Q23IIx`,
         "text": `Планируете записать видосик на эту тему? Плюсую но слишком много буквы!`
       }
     ]
   }
 ];
 
+
+const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
+
 const app = express();
 app.use(express.json());
-search(app, new DataService(mockData));
+
+beforeAll(async () => {
+  await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
+  search(app, new DataService(mockDB));
+});
+
 
 describe(`API returns offer based on search query`, () => {
   let response;
@@ -123,15 +118,15 @@ describe(`API returns offer based on search query`, () => {
     response = await request(app)
       .get(`/search`)
       .query({
-        query: `Как начать программировать`
+        query: `золотое сечение`
       });
   });
 
   test(`Status code is 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
 
-  test(`1 offer found`, () => expect(response.body.length).toBe(1));
+  test(`1 article found`, () => expect(response.body.length).toBe(1));
 
-  test(`Offer has correct id`, () => expect(response.body[0].id).toBe(`kK-2hs`));
+  test(`Article has correct title`, () => expect(response.body[0].title).toBe(`Что такое золотое сечение`));
 });
 
 test(`API returns code 404 if nothing is found`,

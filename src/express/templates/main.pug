@@ -8,34 +8,7 @@ block content
     section.main-page__theme-list
       h2.visually-hidden Список тем
       ul.themes
-        li.themes__item
-          a.themes__item-link(href='#')
-            | Автомобили 
-            sup 88
-        li.themes__item
-          a.themes__item-link(href='#')
-            | Удаленная работа 
-            sup 13
-        li.themes__item
-          a.themes__item-link(href='#')
-            | Бизнес 
-            sup 13
-        li.themes__item
-          a.themes__item-link(href='#')
-            | Путешествия 
-            sup 13
-        li.themes__item
-          a.themes__item-link.themes__item-link--padding(href='#')
-            | Дизайн и обустройство 
-            sup 13
-        li.themes__item
-          a.themes__item-link(href='#')
-            | Производство игрушек 
-            sup 22
-        li.themes__item
-          a.themes__item-link(href='#')
-            | UX & UI 
-            sup 22
+        include partials/categories.pug
     .main-page__section-flex
       section.main-page__hot.hot
         h2.hot__name
@@ -92,17 +65,17 @@ block content
       h2.visually-hidden Список превью статей
       ul.preview__list
         each article in articles
-          li.preview__item(class=article.picture ? `` : `preview__item--noimage`)
+          +isPictureExistsArticleClass(article)
             ul.preview__breadcrumbs
-              each category in article.category
+              each category in article.categories
                 li.preview__breadcrumbs-item
-                  a.preview__breadcrumbs-link(href='#') #{category}
+                  a.preview__breadcrumbs-link(href=`/articles/category/${category.id}`) #{category.name}
             if article.picture
               .preview__background
                 img.preview__background-image(src=`img/${article.picture}` width='460' height='240' alt='')
             time.preview__time(datetime=article.createdDate) #{article.createdDate}
             h3.preview__name
-              a.preview__name-link(href='#') #{article.title}
+              a.preview__name-link(href=`/articles/${article.id}`) #{article.title}
             p.preview__text
               | #{article.announce}
             a.preview__comment(href='#')

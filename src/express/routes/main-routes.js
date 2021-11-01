@@ -7,10 +7,15 @@ const api = require(`../api`).getAPI();
 const mainRouter = new Router();
 
 mainRouter.get(`/`, async (req, res) => {
-  const data = await api.getArticles();
-  const articles = data.reverse();
+  const [
+    articles,
+    categories
+  ] = await Promise.all([
+    api.getArticles(),
+    api.getCategories(true)
+  ]);
 
-  res.render(`main`, {articles});
+  res.render(`main`, {articles, categories});
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
