@@ -4,8 +4,7 @@ const {Router} = require(`express`);
 const {HttpCode} = require(`../../constants`);
 const api = require(`../api`).getAPI();
 
-// Временно поставим "4". Исправить на "8"
-const ARTICLES_PER_PAGE = 4;
+const ARTICLES_PER_PAGE = 8;
 
 const mainRouter = new Router();
 
