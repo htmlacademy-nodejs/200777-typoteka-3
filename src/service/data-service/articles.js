@@ -9,6 +9,20 @@ class ArticlesService {
     this._Category = sequelize.models.Category;
   }
 
+  async findPage({limit, offset}) {
+    const {count, rows} = await this._Article.findAndCountAll({
+      limit,
+      offset,
+      include: [Alias.CATEGORIES],
+      order: [
+        [`createdAt`, `DESC`]
+      ],
+      distinct: true
+    });
+
+    return {count, articles: rows};
+  }
+
   async findAll() {
     const include = [Alias.CATEGORIES, Alias.COMMENTS];
 
