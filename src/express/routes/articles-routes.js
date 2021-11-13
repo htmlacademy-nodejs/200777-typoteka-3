@@ -5,6 +5,8 @@ const multer = require(`multer`);
 const path = require(`path`);
 const {nanoid} = require(`nanoid`);
 
+const {prepareErrors} = require(`../../utils`);
+
 const api = require(`../api`).getAPI();
 
 const articlesRouter = new Router();
@@ -24,8 +26,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage});
 
+const getAddArticleData = () => {
+  return api.getCategories();
+};
+
 articlesRouter.get(`/add`, async (req, res) => {
-  const categories = await api.getCategories();
+  const categories = await getAddArticleData();
   const categoriesList = categories.map((category) => ({
     checked: false,
     ...category
@@ -49,8 +55,14 @@ articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
   try {
     await api.createArticle(newArticleData);
     res.redirect(`/my`);
-  } catch (error) {
-    res.redirect(`back`);
+  } catch (errors) {
+    const validationMessages = prepareErrors(errors);
+    const categoriesList = await getAddArticleData();
+
+    res.render(`articles/post`, {
+      categoriesList,
+      validationMessages
+    });
   }
 });
 

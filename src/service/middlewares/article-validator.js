@@ -12,7 +12,6 @@ const ErrorArticleMessage = {
   ANNOUNCE_MAX: `Аннонс не может содержать более 250 символов`,
   FULLTEXT_MAX: `Полный текст не может содержать более 1000 символов`,
   CATEGORIES: `Не выбрана ни одна категория статьи`,
-  PICTURE: `Изображение не выбрано или тип изображения не поддерживается`
 };
 
 const schema = Joi.object({
@@ -51,10 +50,6 @@ const schema = Joi.object({
     .required(),
   picture: Joi
     .string()
-    .required()
-    .messages({
-      'string.empty': ErrorArticleMessage.PICTURE
-    })
 });
 
 module.exports = (req, res, next) => {

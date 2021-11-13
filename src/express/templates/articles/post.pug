@@ -47,3 +47,4 @@ block content
                 label
                   textarea(rows='10' name='full-text' placeholder='Полный текст публикации')
                     | #{(article ? article.fullText : ``)}
+      +insertErrorMessage(validationMessages)

@@ -7,7 +7,9 @@ const {
   getRandomInt,
   shuffle,
   readContent,
-  getPictureFileName
+  getPictureFileName,
+  getRandomDate,
+  getRandomArray
 } = require(`../../utils`);
 
 const {
@@ -27,6 +29,7 @@ const users = require(`../../users`);
 const {generateArticles} = require(`../../generate-articles`);
 
 const FILE_NAME = `fill-db.sql`;
+
 
 module.exports = {
   name: `--fill`,
@@ -64,7 +67,9 @@ module.exports = {
         {
           getRandomInt,
           shuffle,
-          getPictureFileName
+          getPictureFileName,
+          getRandomDate,
+          getRandomArray
         },
         {
           AnnounceRestrict,
@@ -79,7 +84,12 @@ module.exports = {
 
     const comments = articles.flatMap((article) => article.comments);
 
-    const articleCategories = articles.map((article, index) => ({articleId: index + 1, categoryId: article.categories[0]}));
+    const articleCategories = articles.flatMap((article, index) => {
+      return article.categories.map((categoryId) => ({
+        articleId: index + 1,
+        categoryId
+      }));
+    });
 
     const userValues = users.map(
         ({email, passwordHash, firstName, lastName, avatar}) => `('${email}', '${passwordHash}', '${firstName}', '${lastName}', '${avatar}')`)
@@ -88,34 +98,36 @@ module.exports = {
     const categoryValues = categories.map((name) => `('${name}')`).join(`,\n`);
 
     const articleValues = articles.map(
-        ({title, picture, fullText, announce, userId}) => `('${title}', '${picture}', '${fullText}', '${announce}', ${userId})`
+        ({title, publicationDate, picture, fullText, announce, userId}) => `('${title}', '${publicationDate}', '${picture}', '${fullText}', '${announce}', '${userId}')`
     ).join(`,\n`);
 
-    const articleCategoryValues = articleCategories.map(({articleId, categoryId}) => `(${articleId}, ${categoryId})`).join(`,\n`);
+    const articleCategoryValues = articleCategories.map(({articleId, categoryId}) => (`('${articleId}', '${categoryId}')`)).join(`,\n`);
+
 
     const commentValues = comments.map(({text, userId, articleId}) => `('${text}', ${userId}, ${articleId})`).join(`,\n`);
+
 
     const content = `
     -- Запрос на заполнение users пользователями
     INSERT INTO users(email, password_hash, first_name, last_name, avatar) VALUES
     ${userValues};
-    
+
     -- Запрос на заполнение categories категориями
     INSERT INTO categories(name) VALUES
     ${categoryValues};
-    
+
     -- Запрос на заполнение articles статьями
     ALTER TABLE articles DISABLE TRIGGER ALL;
-    INSERT INTO articles(title, created_at, picture, full_text, announce, user_id) VALUES
+    INSERT INTO articles(title, publication_date, picture, full_text, announce, user_id) VALUES
     ${articleValues};
     ALTER TABLE articles ENABLE TRIGGER ALL;
-    
+
     -- Запрос на создание связей между каждой статьёй из articles с категориями
-    ALTER TABLE articles_categories DISABLE TRIGGER ALL;
-    INSERT INTO articles_categories(article_id, category_id) VALUES
+    ALTER TABLE article_categories DISABLE TRIGGER ALL;
+    INSERT INTO article_categories(article_id, category_id) VALUES
     ${articleCategoryValues};
-    ALTER TABLE articles_categories ENABLE TRIGGER ALL;
-    
+    ALTER TABLE article_categories ENABLE TRIGGER ALL;
+
     -- Запрос на создание комментариев к статьям articles
     ALTER TABLE comments DISABLE TRIGGER ALL;
     INSERT INTO comments(text, user_id, article_id) VALUES

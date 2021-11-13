@@ -20,7 +20,7 @@ class API {
     return response.data;
   }
 
-  getArticles({comments, limit, offset}) {
+  getArticles({comments, limit, offset} = {}) {
     return this._load(`/articles`, {params: {offset, limit, comments}});
   }
 

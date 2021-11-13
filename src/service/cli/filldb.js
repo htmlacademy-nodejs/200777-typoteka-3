@@ -10,7 +10,9 @@ const {
   getRandomInt,
   shuffle,
   readContent,
-  getPictureFileName
+  getPictureFileName,
+  getRandomDate,
+  getRandomArray
 } = require(`../../utils`);
 
 const {
@@ -68,7 +70,9 @@ module.exports = {
         {
           getRandomInt,
           shuffle,
-          getPictureFileName
+          getPictureFileName,
+          getRandomDate,
+          getRandomArray
         },
         {
           AnnounceRestrict,
