@@ -104,7 +104,7 @@ module.exports = {
     const articleCategoryValues = articleCategories.map(({articleId, categoryId}) => (`('${articleId}', '${categoryId}')`)).join(`,\n`);
 
 
-    const commentValues = comments.map(({text, userId, articleId}) => `('${text}', ${userId}, ${articleId})`).join(`,\n`);
+    const commentValues = comments.map(({text, userId, articleId}) => `('${text}', '${userId}', '${articleId}')`).join(`,\n`);
 
 
     const content = `
