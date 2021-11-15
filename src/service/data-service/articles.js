@@ -23,8 +23,12 @@ class ArticlesService {
     return {count, articles: rows};
   }
 
-  async findAll() {
-    const include = [Alias.CATEGORIES, Alias.COMMENTS];
+  async findAll(needComments) {
+    const include = [Alias.CATEGORIES];
+
+    if (needComments) {
+      include.push(Alias.COMMENTS);
+    }
 
     const articles = await this._Article.findAll({
       include,

@@ -9,38 +9,19 @@ block content
         .post__wrapper
           .post__head
             a.post__backwards.button.button--backwards(href='#') Назад
-            time.post__date(datetime='2019-03-21T20:33') 21.03.2019, 20:33
+            +formatTimeTag(article, `publicationDate`)(class=`post__date`)
             h2.post__title.title.title--main #{article.title}
             ul.post__themes.themes
-              li.themes__item
-                a.themes__item-link(href='#')
-                  | Автомобили
-                  sup 88
-                button.themes__remove-btn(type='button') Удалить категорию
-              li.themes__item
-                a.themes__item-link(href='#')
-                  | Удаленная работа
-                  sup 13
-                button.themes__remove-btn(type='button') Удалить категорию
-              li.themes__item
-                a.themes__item-link(href='#')
-                  | Бизнес
-                  sup 13
-                button.themes__remove-btn(type='button') Удалить категорию
+              each category in article.categories
+                li.themes__item
+                  a.themes__item-link(href=`/articles/category/${category.id}`) #{category.name}
+                    sup 88
+                  button.themes__remove-btn(type='button') Удалить категорию
           +insertArticlePicture(article)
           .post__text
-            h3 Бирюзовое доверие
-            p
-              | У Apple иногда попадаются интерфейсы, за которые создателей хочется сильно
-              | поругать
-              | — к примеру интерфейс
-              | публикации приложения в AppStore, для которого я уже неделю восстановливаю свой аккаунт разработчика.
-            p
-              | Или интерфейс подключения AirPods на макбуке. Чтобы переключить наушники между
-              | телефоном и компьютером,
-              | нужно сначала нажать на значок звука, затем дождаться, когда в списке устройств появятся наушники, потом
-              | нажать на них и дождаться, пока случится вся магия подключения. Иногда по загадочным причинам магия не
-              | случается, и операцию нужно повторить, выполняя все те же клики-ожидания-клики — бесит.
+            h3 #{article.title}
+            p #{article.announce}
+            p #{article.fullText}
       .post__wrapper.post__wrapper--comments
         section.post__comments.comments
           h2.comments__title.title.title--middle Комментарии
@@ -55,10 +36,12 @@ block content
                     +formatTimeTag(comment)(class=`comments__date`)
                   p.comments__message #{comment.text}
           .comments__footer.comments__footer--user
-            form(action='#' method='POST')
+            form(action=`/articles/${id}/comments` method='POST' enctype='application/x-www-form-urlencoded'
+             autocomplete='off')
               .comments__avatar.avatar
                 img(src='/img/avatar-2.png' alt='аватар пользователя')
               label
                 textarea(rows='1' name='message' placeholder='Присоединиться к обсуждению')
+                +insertErrorMessages(validationMessages)
               button.comments__button.button.button--colored(type='submit') Опубликовать
             p.comments__error Сообщение не может быть пустым, напишите что-нибудь!

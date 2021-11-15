@@ -41,7 +41,7 @@ module.exports.getRandomDate = () => {
 
   const date = Math.random() > 0.5 ? new Date() : getOtherDate();
 
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+  return `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`;
 };
 
 module.exports.prepareErrors = (errors) => {

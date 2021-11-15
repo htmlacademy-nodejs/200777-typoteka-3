@@ -30,6 +30,26 @@ const getAddArticleData = () => {
   return api.getCategories();
 };
 
+const getEditArticleData = async (id) => {
+  const [article, categories] = await Promise.all([
+    api.getArticle(id),
+    api.getCategories()
+  ]);
+
+  const categoriesList = categories.map((category) => ({
+    checked: article.categories
+      .map((item) => item.id)
+      .includes(category.id),
+    ...category
+  }));
+
+  return [article, categoriesList];
+};
+
+const getViewArticleData = async (id, needComments) => {
+  return await api.getArticle(id, needComments);
+};
+
 articlesRouter.get(`/add`, async (req, res) => {
   const categories = await getAddArticleData();
   const categoriesList = categories.map((category) => ({
@@ -40,17 +60,39 @@ articlesRouter.get(`/add`, async (req, res) => {
   res.render(`articles/post`, {categoriesList});
 });
 
-articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
+articlesRouter.get(`/category/:categoryId`,
+    (req, res) => res.render(`articles/articles-by-category`));
+
+
+articlesRouter.get(`/edit/:id`, async (req, res) => {
+  const {id} = req.params;
+  const [article, categoriesList] = await getEditArticleData(id);
+
+  res.render(`articles/post`, {article, categoriesList});
+});
+
+
+articlesRouter.get(`/:id`, async (req, res) => {
+  const {id} = req.params;
+  const article = await getViewArticleData(id, true);
+
+  res.render(`articles/post-detail`, {article, id});
+});
+
+
+articlesRouter.post(`/add`, upload.single(`upload`), async (req, res) => {
   const {body, file} = req;
 
   const newArticleData = {
     title: body.title,
-    createdDate: body.date,
+    publicationDate: body.date,
     announce: body.announcement,
     fullText: body[`full-text`],
     categories: Object.keys(body.categories),
     picture: file ? file.filename : ``
   };
+
+  console.log(body);
 
   try {
     await api.createArticle(newArticleData);
@@ -66,31 +108,20 @@ articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
   }
 });
 
-articlesRouter.get(`/category/:categoryId`,
-    (req, res) => res.render(`articles/articles-by-category`));
 
-articlesRouter.get(`/edit/:id`, async (req, res) => {
+articlesRouter.post(`/:id/comments`, async (req, res) => {
   const {id} = req.params;
-  const [article, categories] = await Promise.all([
-    api.getArticle(id),
-    api.getCategories()
-  ]);
+  const {message} = req.body;
 
-  const categoriesList = categories.map((category) => ({
-    checked: article.categories
-      .map((item) => item.id)
-      .includes(category.id),
-    ...category
-  }));
-
-  res.render(`articles/post`, {article, categoriesList});
+  try {
+    await api.createComment(id, {text: message});
+    res.redirect(`/articles/${id}`);
+  } catch (errors) {
+    const validationMessages = prepareErrors(errors);
+    const article = await getViewArticleData(id, true);
+    res.render(`articles/post-detail`, {article, id, validationMessages});
+  }
 });
 
-articlesRouter.get(`/:id`, async (req, res) => {
-  const {id} = req.params;
-  const article = await api.getArticle(id, true);
-
-  res.render(`articles/post-detail`, {article});
-});
 
 module.exports = articlesRouter;

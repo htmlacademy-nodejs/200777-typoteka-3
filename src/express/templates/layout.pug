@@ -31,7 +31,7 @@ html(lang='ru')
           return `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}, ${date.getHours()}:${date.getMinutes()}`;
         };
 
-    mixin insertErrorMessage(messages)
+    mixin insertErrorMessages(messages)
       if messages
         each message in messages
           .server-error= message
@@ -45,8 +45,8 @@ html(lang='ru')
       li.preview__item(class=article.picture ? `` : `preview__item--noimage`)
         block
 
-    mixin formatTimeTag(dataItem)
-      time(class!=attributes.class datetime=dataItem.createdAt) #{formatDate(dataItem.createdAt)}
+    mixin formatTimeTag(dataItem, timeField = `createdAt`)
+      time(class!=attributes.class datetime=dataItem[timeField])= formatDate(dataItem[timeField])
 
     mixin pagination(page, totalPages, width, prefix)
       -
