@@ -25,7 +25,6 @@ mainRouter.get(`/`, async (req, res) => {
   ]);
 
   const totalPages = Math.ceil(count / ARTICLES_PER_PAGE);
-  // console.log(articles);
   res.render(`main`, {articles, page, totalPages, categories});
 });
 

@@ -50,6 +50,7 @@ const getViewArticleData = async (id, needComments) => {
   return await api.getArticle(id, needComments);
 };
 
+
 articlesRouter.get(`/add`, async (req, res) => {
   const categories = await getAddArticleData();
   const categoriesList = categories.map((category) => ({
@@ -59,6 +60,7 @@ articlesRouter.get(`/add`, async (req, res) => {
 
   res.render(`articles/post`, {categoriesList});
 });
+
 
 articlesRouter.get(`/category/:categoryId`,
     (req, res) => res.render(`articles/articles-by-category`));
@@ -85,14 +87,12 @@ articlesRouter.post(`/add`, upload.single(`upload`), async (req, res) => {
 
   const newArticleData = {
     title: body.title,
-    publicationDate: body.date,
+    publicationDate: new Date(body.date),
     announce: body.announcement,
     fullText: body[`full-text`],
-    categories: Object.keys(body.categories),
+    categories: Object.keys(body.categories).map((id) => +id.replace(/'/g, ``)),
     picture: file ? file.filename : ``
   };
-
-  console.log(body);
 
   try {
     await api.createArticle(newArticleData);

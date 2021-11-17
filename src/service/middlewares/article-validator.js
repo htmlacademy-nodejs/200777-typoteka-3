@@ -12,6 +12,7 @@ const ErrorArticleMessage = {
   ANNOUNCE_MAX: `Аннонс не может содержать более 250 символов`,
   FULLTEXT_MAX: `Полный текст не может содержать более 1000 символов`,
   CATEGORIES: `Не выбрана ни одна категория статьи`,
+  PUBLICATION_DATE_FORMAT: `Дата публикации не передана или формат некорректен`
 };
 
 const schema = Joi.object({
@@ -23,6 +24,13 @@ const schema = Joi.object({
     .messages({
       'string.min': ErrorArticleMessage.TITLE_MIN,
       'string.max': ErrorArticleMessage.TITLE_MAX
+    }),
+  publicationDate: Joi
+    .date()
+    .iso()
+    .required()
+    .messages({
+      'date.format': ErrorArticleMessage.PUBLICATION_DATE_FORMAT
     }),
   announce: Joi
     .string()
