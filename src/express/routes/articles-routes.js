@@ -52,13 +52,14 @@ const getViewArticleData = async (id, needComments) => {
 
 
 articlesRouter.get(`/add`, async (req, res) => {
+  const {url} = req;
   const categories = await getAddArticleData();
   const categoriesList = categories.map((category) => ({
     checked: false,
     ...category
   }));
 
-  res.render(`articles/post`, {categoriesList});
+  res.render(`articles/post`, {categoriesList, url});
 });
 
 
@@ -67,10 +68,11 @@ articlesRouter.get(`/category/:categoryId`,
 
 
 articlesRouter.get(`/edit/:id`, async (req, res) => {
+  const {url} = req;
   const {id} = req.params;
   const [article, categoriesList] = await getEditArticleData(id);
 
-  res.render(`articles/post`, {article, categoriesList});
+  res.render(`articles/post`, {article, categoriesList, url});
 });
 
 
@@ -115,11 +117,36 @@ articlesRouter.post(`/:id/comments`, async (req, res) => {
 
   try {
     await api.createComment(id, {text: message});
-    res.redirect(`/articles/${id}`);
+    res.redirect(`/my`);
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
     const article = await getViewArticleData(id, true);
     res.render(`articles/post-detail`, {article, id, validationMessages});
+  }
+});
+
+articlesRouter.post(`/edit/:id`, upload.single(`upload`), async (req, res) => {
+  const {url} = req;
+  const {id} = req.params;
+  const {body, file} = req;
+
+  const newArticleData = {
+    title: body.title,
+    publicationDate: new Date(body.date),
+    announce: body.announcement,
+    fullText: body[`full-text`],
+    categories: Object.keys(body.categories).map((categoryId) => +categoryId.replace(/'/g, ``)),
+    picture: file ? file.filename : body.photo
+  };
+
+
+  try {
+    await api.editArticle(id, newArticleData);
+    res.redirect(`/my`);
+  } catch (error) {
+    const validationMessages = prepareErrors(error);
+    const [article, categoriesList] = await getEditArticleData(id);
+    res.render(`articles/post`, {article, categoriesList, url, validationMessages});
   }
 });
 

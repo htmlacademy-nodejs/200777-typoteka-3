@@ -21,6 +21,7 @@ const mockCategories = [
 const mockArticles = [
   {
     "title": `Лучшие рок-музыканты 20-века`,
+    "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Из под его пера вышло 8 платиновых альбомов. Простые ежедневные упражнения помогут достичь успеха.`,
     "fullText": `Достичь успеха помогут ежедневные повторения. Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
     "picture": ``,
@@ -37,6 +38,7 @@ const mockArticles = [
   },
   {
     "title": `Другой пост`,
+    "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Бороться с прокрастинацией несложно.`,
     "fullText": `Этот смартфон — настоящая находка. Большой и яркий экран мощнейший процессор — всё это в небольшом гаджете. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле?`,
     "picture": `item03.jpg`,
@@ -61,6 +63,7 @@ const mockArticles = [
   },
   {
     "title": `Что такое золотое сечение`,
+    "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
     "fullText": `Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Вы можете достичь всего. Стоит только немного постараться и запастись книгами.`,
     "picture": ``,
@@ -73,6 +76,7 @@ const mockArticles = [
   },
   {
     "title": `Борьба с прокрастинацией`,
+    "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Первая большая ёлка была установлена только в 1938 году. Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Он написал больше 30 хитов.`,
     "fullText": `Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Из под его пера вышло 8 платиновых альбомов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
     "picture": `item02.jpg`,
@@ -88,6 +92,7 @@ const mockArticles = [
   },
   {
     "title": `Как начать программировать`,
+    "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
     "fullText": `Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Это один из лучших рок-музыкантов. Собрать камни бесконечности легко если вы прирожденный герой.`,
     "picture": `item01.jpg`,
@@ -176,10 +181,11 @@ describe(`API returns a list of comments to given article`, () => {
 
 describe(`API creates an article when data is valid`, () => {
   const newArticle = {
-    title: `Валидный артикл`,
-    announce: `Новый аннонс`,
-    fullText: `Всё валидно`,
-    categories: [3, 4],
+    title: `Валидный артикл. Нужно очень много слов.`,
+    publicationDate: `2021-11-17T15:53:11.237Z`,
+    announce: `Новый аннонс. Но будет валиден, если будет побольше букв.`,
+    fullText: `Всё валидно. Пост будет создан и отображён при проверке :)`,
+    categories: [3, 4]
   };
 
   let app;
@@ -194,10 +200,10 @@ describe(`API creates an article when data is valid`, () => {
 
   test(`Status code is 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
 
-  test(`Last added article's title is "Валидный артикл"`,
+  test(`Last added article's title is "Валидный артикл. Нужно очень много слов."`,
       () => request(app)
       .get(`/articles`)
-      .expect((res) => expect(res.body[0].title).toBe(`Валидный артикл`)));
+      .expect((res) => expect(res.body[0].title).toBe(`Валидный артикл. Нужно очень много слов.`)));
 
   test(`Articles count is changed`, () => request(app)
     .get(`/articles`)
@@ -207,10 +213,10 @@ describe(`API creates an article when data is valid`, () => {
 
 describe(`API refuses to create an article if data is invalid`, () => {
   const newArticle = {
-    title: `Этот артикл`,
-    announce: `не будет`,
-    fullText: `валидным`,
-    category: [`Пробуем!`],
+    title: `Этот артикл. Много-много слов. Целых 30+`,
+    publicationDate: `2021-11-17T15:53:11.237Z`,
+    announce: `не будет здесь много слов. Но больше 30 точно`,
+    categories: [2, 3]
   };
 
   let app;
@@ -226,6 +232,36 @@ describe(`API refuses to create an article if data is invalid`, () => {
       await request(app)
         .post(`/articles`)
         .send(badArticle)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field type is wrong response code is 400`, async () => {
+    const badOffers = [
+      {...newArticle, title: false},
+      {...newArticle, publicationDate: 345},
+      {...newArticle, categories: `Нечто новое`}
+    ];
+
+    for (const badOffer of badOffers) {
+      await request(app)
+        .post(`/articles`)
+        .send(badOffer)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field value is wrong response code is 400`, async () => {
+    const badOffers = [
+      {...newArticle, title: `Короткий`},
+      {...newArticle, publicationDate: `2010 год, 30 февраля`},
+      {...newArticle, categories: []}
+    ];
+
+    for (const badOffer of badOffers) {
+      await request(app)
+        .post(`/articles`)
+        .send(badOffer)
         .expect(HttpCode.BAD_REQUEST);
     }
   });
@@ -285,8 +321,9 @@ test(`API refuses to create a comment when data is invalid and returns status co
 
 describe(`API changes existent article`, () => {
   const newArticleData = {
-    title: `Новые данные`,
-    announce: `для`,
+    title: `Новые данные. Нужно побольше текста`,
+    publicationDate: `2021-11-17T15:53:11.237Z`,
+    announce: `Аннонс! Это длинный текст. Очень!`,
     fullText: `артикла`,
     categories: [2, 3],
   };
@@ -301,20 +338,19 @@ describe(`API changes existent article`, () => {
       .send(newArticleData);
   });
 
-  test(`Status code is 201`, () => expect(response.statusCode).toBe(HttpCode.OK));
+  test(`Status code is 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
 
   test(`Article is really changed`, () => request(app)
     .get(`/articles/1`)
-    .expect((res) => expect(res.body.title).toBe(`Новые данные`))
+    .expect((res) => expect(res.body.title).toBe(`Новые данные. Нужно побольше текста`))
   );
 });
 
-
 test(`API returns status code 404 when trying to change non-existing article with valid data`, async () => {
   const newArticleData = {
-    title: `Новые данные`,
-    announce: `для`,
-    fullText: `артикла`,
+    title: `Новые данные для старой статьи`,
+    publicationDate: `2021-11-17T15:53:11.237Z`,
+    announce: `Нужно, чтобы здесь было более 30 символов. Мы это сделали!`,
     categories: [2, 4],
   };
 
@@ -329,8 +365,8 @@ test(`API returns status code 404 when trying to change non-existing article wit
 
 test(`API returns status code 400 when trying to change non-existing article with invalid data`, async () => {
   const newArticleData = {
-    title: `Не хватает полей!`,
-    announce: `fulltext'а нет`,
+    title: `Не хватает полей! But we will try to change it!`,
+    announce: `publicationDate field is not existent! But we can try`,
     categories: [4],
   };
 
@@ -405,3 +441,4 @@ test(`API refuses to delete a comment to non-existing article`, async () => {
     .delete(`/article/100/comments/1`)
     .expect(HttpCode.NOT_FOUND);
 });
+
