@@ -11,8 +11,8 @@ module.exports = async (sequelize, {categories, articles}) => {
       categories.map((item) => ({name: item}))
   );
 
-  const categoryIdByName = categoryModels.reduce((acc, category) => ({
-    [category.name]: category.id,
+  const categoryIdByName = categoryModels.reduce((acc, next) => ({
+    [next.name]: next.id,
     ...acc
   }), {});
 

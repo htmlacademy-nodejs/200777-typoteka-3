@@ -21,11 +21,10 @@ mainRouter.get(`/`, async (req, res) => {
     categories
   ] = await Promise.all([
     api.getArticles({limit, offset}),
-    api.getCategories(true)
+    api.getCategories()
   ]);
 
   const totalPages = Math.ceil(count / ARTICLES_PER_PAGE);
-
   res.render(`main`, {articles, page, totalPages, categories});
 });
 

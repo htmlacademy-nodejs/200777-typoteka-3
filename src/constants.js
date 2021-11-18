@@ -15,6 +15,12 @@ module.exports.HttpCode = {
   UNAUTHORIZED: 401,
   BAD_REQUEST: 400,
 };
+module.exports.HttpMethod = {
+  GET: `GET`,
+  POST: `POST`,
+  PUT: `PUT`,
+  DELETE: `DELETE`
+};
 module.exports.MAX_ID_LENGTH = 6;
 module.exports.API_PREFIX = `/api`;
 module.exports.Env = {

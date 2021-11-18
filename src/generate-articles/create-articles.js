@@ -30,12 +30,16 @@ module.exports.createArticles = (
             restricts.FullTextRestrict.MAX
         )
         .join(` `),
-      categories: [
-        utilFunctions.getRandomInt(
-            restricts.CATEGORY_MIN_COUNT,
-            categoryCount
-        )
-      ],
+      categories: utilFunctions.getRandomArray(
+          utilFunctions.getRandomInt(
+              restricts.CATEGORY_MIN_COUNT,
+              categoryCount
+          ),
+          {
+            MIN: restricts.CATEGORY_MIN_COUNT,
+            MAX: categoryCount
+          }
+      ),
       picture: Math.random() > 0.5 ?
         utilFunctions.getPictureFileName(
             utilFunctions.getRandomInt(
@@ -43,6 +47,7 @@ module.exports.createArticles = (
                 restricts.PictureRestrict.MAX
             )
         ) : ``,
+      publicationDate: utilFunctions.getRandomDate(),
       userId: utilFunctions.getRandomInt(
           restricts.USER_ID_MIN,
           userCount

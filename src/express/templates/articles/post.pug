@@ -5,7 +5,7 @@ block content
   section
     .popup.popup--new-publication.popup--anti
       .new-publication
-        form(action='/articles/add' method='post' enctype='multipart/form-data')
+        form(action=`/articles${url}` method='post' enctype='multipart/form-data')
           .new-publication__header
             h1 Новая публикация
             .new-publication__date-form
@@ -35,7 +35,7 @@ block content
               .new-publication__category-wrapper
                 each category in categoriesList
                   .new-publication__checkbox(class=`new-publication__checkbox--${category.id}`)
-                    input(id=category.id type='checkbox' name=`categories[${category.id}]` checked=category.checked)
+                    input(id=category.id type='checkbox' name=`categories['${category.id}']` checked=category.checked)
                     label(for=category.id) #{category.name}
                 a.new-publication__form-link.button.button--transparent(href='/categories') Добавить категорию
             .form__wrapper.form__wrapper--text
@@ -47,3 +47,4 @@ block content
                 label
                   textarea(rows='10' name='full-text' placeholder='Полный текст публикации')
                     | #{(article ? article.fullText : ``)}
+      +insertErrorMessages(validationMessages)

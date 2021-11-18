@@ -14,13 +14,27 @@ html(lang='ru')
       .pagination__item--active{
         pointer-events: none;
       }
+      .server-error{
+        margin: 0 40px;
+        padding: 15px;
+
+        border-radius: 10px;
+        color: #fff;
+
+        background-color: #ff6347;
+      }
 
   body
     -
       const formatDate = (dateString) => {
           const date = new Date(dateString);
-          return `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}, ${date.getHours()}:${date.getMinutes()}`;
+          return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}, ${date.getHours()}:${date.getMinutes()}`;
         };
+
+    mixin insertErrorMessages(messages)
+      if messages
+        each message in messages
+          .server-error= message
 
     mixin insertArticlePicture(article)
       if article.picture
@@ -31,8 +45,8 @@ html(lang='ru')
       li.preview__item(class=article.picture ? `` : `preview__item--noimage`)
         block
 
-    mixin formatTimeTag(dataItem)
-      time(class!=attributes.class datetime=dataItem.createdAt) #{formatDate(dataItem.createdAt)}
+    mixin formatTimeTag(dataItem, timeField = `createdAt`)
+      time(class!=attributes.class datetime=dataItem[timeField])= formatDate(dataItem[timeField])
 
     mixin pagination(page, totalPages, width, prefix)
       -
