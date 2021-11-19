@@ -9,7 +9,7 @@ const commentValidator = require(`../middlewares/comment-validator`);
 const routeParamsValidator = require(`../middlewares/route-params-validator`);
 
 
-module.exports = (app, articlesService, commentsService) => {
+module.exports = (app, articleService, commentService) => {
   const route = new Router();
 
   app.use(`/articles`, route);
@@ -21,9 +21,9 @@ module.exports = (app, articlesService, commentsService) => {
 
     let result;
     if (limit || offset) {
-      result = await articlesService.findPage({limit, offset});
+      result = await articleService.findPage({limit, offset});
     } else {
-      result = await articlesService.findAll(comments);
+      result = await articleService.findAll(comments);
     }
 
     res
@@ -36,7 +36,7 @@ module.exports = (app, articlesService, commentsService) => {
   route.get(`/:articleId`, routeParamsValidator, async (req, res) => {
     const {articleId} = req.params;
     const {needComments} = req.query;
-    const article = await articlesService.findOne(articleId, needComments);
+    const article = await articleService.findOne(articleId, needComments);
 
     if (!article) {
       return res
@@ -51,9 +51,9 @@ module.exports = (app, articlesService, commentsService) => {
 
 
   // Get article's comments
-  route.get(`/:articleId/comments`, [routeParamsValidator, articleExists(articlesService)], async (req, res) => {
+  route.get(`/:articleId/comments`, [routeParamsValidator, articleExists(articleService)], async (req, res) => {
     const {articleId} = req.params;
-    const comments = await commentsService.findAll(articleId);
+    const comments = await commentService.findAll(articleId);
 
     res
       .status(HttpCode.OK)
@@ -63,7 +63,7 @@ module.exports = (app, articlesService, commentsService) => {
 
   // Get articles by category (will be released in next course modules)
   route.get(`/category/:categoryId`, async (req, res) => {
-    const articles = await articlesService.findAll();
+    const articles = await articleService.findAll();
 
     res
       .status(HttpCode.OK)
@@ -73,7 +73,7 @@ module.exports = (app, articlesService, commentsService) => {
 
   // Create article
   route.post(`/`, articleValidator, async (req, res) => {
-    const article = await articlesService.create(req.body);
+    const article = await articleService.create(req.body);
 
     res
       .status(HttpCode.CREATED)
@@ -82,9 +82,9 @@ module.exports = (app, articlesService, commentsService) => {
 
 
   // Create comment for article
-  route.post(`/:articleId/comments`, [routeParamsValidator, articleExists(articlesService), commentValidator], async (req, res) => {
+  route.post(`/:articleId/comments`, [routeParamsValidator, articleExists(articleService), commentValidator], async (req, res) => {
     const {articleId} = req.params;
-    const newComment = await commentsService.create(articleId, req.body);
+    const newComment = await commentService.create(articleId, req.body);
 
     res
       .status(HttpCode.CREATED)
@@ -96,7 +96,7 @@ module.exports = (app, articlesService, commentsService) => {
   route.put(`/:articleId`, [routeParamsValidator, articleValidator], async (req, res) => {
     const {articleId} = req.params;
 
-    const updated = await articlesService.update(articleId, req.body);
+    const updated = await articleService.update(articleId, req.body);
 
     if (!updated) {
       return res
@@ -113,7 +113,7 @@ module.exports = (app, articlesService, commentsService) => {
   // Delete article by id
   route.delete(`/:articleId`, routeParamsValidator, async (req, res) => {
     const {articleId} = req.params;
-    const deleted = await articlesService.drop(articleId);
+    const deleted = await articleService.drop(articleId);
 
     if (!deleted) {
       return res
@@ -128,9 +128,9 @@ module.exports = (app, articlesService, commentsService) => {
 
 
   // Delete article's comment by id
-  route.delete(`/:articleId/comments/:commentId`, [routeParamsValidator, articleExists(articlesService)], async (req, res) => {
+  route.delete(`/:articleId/comments/:commentId`, [routeParamsValidator, articleExists(articleService)], async (req, res) => {
     const {commentId} = req.params;
-    const deleted = await commentsService.drop(commentId);
+    const deleted = await commentService.drop(commentId);
 
     if (!deleted) {
       return res

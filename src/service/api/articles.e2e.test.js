@@ -5,8 +5,8 @@ const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
 
 const articles = require(`./articles`);
-const DataService = require(`../data-service/articles`);
-const CommentsService = require(`../data-service/comments`);
+const DataService = require(`../data-service/article`);
+const CommentService = require(`../data-service/comment`);
 
 const {HttpCode} = require(`../../constants`);
 const initDB = require(`../lib/init-db`);
@@ -110,7 +110,7 @@ const createAPI = async () => {
   await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
   const app = express();
   app.use(express.json());
-  articles(app, new DataService(mockDB), new CommentsService(mockDB));
+  articles(app, new DataService(mockDB), new CommentService(mockDB));
   return app;
 };
 

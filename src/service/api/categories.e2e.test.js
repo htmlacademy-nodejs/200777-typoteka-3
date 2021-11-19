@@ -5,7 +5,7 @@ const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
 
 const categories = require(`./categories`);
-const DataService = require(`../data-service/categories`);
+const DataService = require(`../data-service/category`);
 const {HttpCode} = require(`../../constants`);
 
 const initDB = require(`../lib/init-db`);
