@@ -1,7 +1,10 @@
-'use strict';
+"use strict";
 
 const {Router} = require(`express`);
+
+const upload = require(`../middlewares/upload`);
 const {HttpCode} = require(`../../constants`);
+const {prepareErrors} = require(`../../utils`);
 const api = require(`../api`).getAPI();
 
 const ARTICLES_PER_PAGE = 8;
@@ -51,5 +54,25 @@ mainRouter.get(`/search`, async (req, res) => {
 });
 
 mainRouter.get(`/categories`, (req, res) => res.render(`all-categories`));
+
+mainRouter.post(`/register`, upload.single(`upload`), async (req, res) => {
+  const {body, file} = req;
+  const userData = {
+    name: body.name,
+    surname: body.surname,
+    email: body.email,
+    password: body.password,
+    passwordRepeated: body[`repeat-password`],
+    avatar: file.filename
+  };
+
+  try {
+    await api.createUser(userData);
+    res.redirect(`/login`);
+  } catch (errors) {
+    const validationMessages = prepareErrors(errors);
+    res.render(`sign-up`, {validationMessages});
+  }
+});
 
 module.exports = mainRouter;

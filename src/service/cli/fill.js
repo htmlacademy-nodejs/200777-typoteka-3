@@ -1,32 +1,18 @@
-'use strict';
+"use strict";
 
 const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 
-const {
-  getRandomInt,
-  shuffle,
-  readContent,
-  getPictureFileName,
-  getRandomDate,
-  getRandomArray
-} = require(`../../utils`);
+const {readContent} = require(`../../utils`);
+const {generateArticles} = require(`./generate-articles`);
 
 const {
-  FilePath,
   ArticlesCount,
-  AnnounceRestrict,
-  FullTextRestrict,
-  PictureRestrict,
-  CommentsCountRestrict,
-  CommentSentencesMaxCount,
-  USER_ID_MIN,
-  CATEGORY_MIN_COUNT
+  TO_SQL_FILE,
+  FilePath
 } = require(`../../constants`);
 
-const users = require(`../../users`);
-
-const {generateArticles} = require(`../../generate-articles`);
+const users = require(`./generate-articles/users`);
 
 const FILE_NAME = `fill-db.sql`;
 
@@ -34,19 +20,6 @@ const FILE_NAME = `fill-db.sql`;
 module.exports = {
   name: `--fill`,
   async run(args) {
-
-    const [
-      titles,
-      categories,
-      sentences,
-      commentSentences
-    ] = await Promise.all([
-      readContent(FilePath.TITLES),
-      readContent(FilePath.CATEGORIES),
-      readContent(FilePath.SENTENCES),
-      readContent(FilePath.COMMENTS)
-    ]);
-
     const [count] = args;
     const countArticles = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
 
@@ -56,30 +29,11 @@ module.exports = {
       return;
     }
 
+    const categories = await readContent(FilePath.CATEGORIES);
 
-    const articles = generateArticles(
-        countArticles,
-        titles,
-        sentences,
-        commentSentences,
-        categories.length,
-        users.length,
-        {
-          getRandomInt,
-          shuffle,
-          getPictureFileName,
-          getRandomDate,
-          getRandomArray
-        },
-        {
-          AnnounceRestrict,
-          FullTextRestrict,
-          PictureRestrict,
-          CommentsCountRestrict,
-          CommentSentencesMaxCount,
-          USER_ID_MIN,
-          CATEGORY_MIN_COUNT,
-        }
+    const articles = await generateArticles(
+        TO_SQL_FILE.TRUE,
+        countArticles
     );
 
     const comments = articles.flatMap((article) => article.comments);
@@ -92,7 +46,7 @@ module.exports = {
     });
 
     const userValues = users.map(
-        ({email, passwordHash, firstName, lastName, avatar}) => `('${email}', '${passwordHash}', '${firstName}', '${lastName}', '${avatar}')`)
+        ({email, passwordHash, name, surname, avatar}) => `('${email}', '${passwordHash}', '${name}', '${surname}', '${avatar}')`)
     .join(`,\n`);
 
     const categoryValues = categories.map((name) => `('${name}')`).join(`,\n`);
@@ -109,7 +63,7 @@ module.exports = {
 
     const content = `
     -- Запрос на заполнение users пользователями
-    INSERT INTO users(email, password_hash, first_name, last_name, avatar) VALUES
+    INSERT INTO users(email, password_hash, name, surname, avatar) VALUES
     ${userValues};
 
     -- Запрос на заполнение categories категориями

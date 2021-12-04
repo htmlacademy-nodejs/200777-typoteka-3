@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports.DEFAULT_COMMAND = `--help`;
 module.exports.USER_ARGV_INDEX = 2;
@@ -58,4 +58,9 @@ module.exports.CommentSentencesMaxCount = {
   MAX: 3
 };
 module.exports.CATEGORY_MIN_COUNT = 1;
+module.exports.CATEGORY_ID_MIN = 1;
 module.exports.USER_ID_MIN = 1;
+module.exports.TO_SQL_FILE = {
+  TRUE: true,
+  FALSE: false
+};

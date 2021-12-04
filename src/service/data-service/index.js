@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const CategoryService = require(`./category`);
 const CommentService = require(`./comment`);

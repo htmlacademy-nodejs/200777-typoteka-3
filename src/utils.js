@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const chalk = require(`chalk`);
 const fs = require(`fs`).promises;
@@ -32,8 +32,7 @@ module.exports.getPictureFileName = (number) => `item${number.toString().padStar
 module.exports.getRandomDate = () => {
   const getOtherDate = () => {
     const date = new Date();
-    const sign = Math.random() > 0.5 ? 1 : -1;
-    const diffValue = sign * getRandomInt(0, 7);
+    const diffValue = getRandomInt(0, 7);
 
     date.setDate(date.getDate() + diffValue);
     return date;
@@ -48,7 +47,7 @@ module.exports.prepareErrors = (errors) => {
   return errors.response.data.split(`\n`);
 };
 
-module.exports.getRandomArray = (count, restricts) => {
+module.exports.getRandomNumbersArray = (count, restricts) => {
   const arr = [];
 
   for (let i = restricts.MIN; i <= count; i++) {

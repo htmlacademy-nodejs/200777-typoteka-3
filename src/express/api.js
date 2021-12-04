@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const axios = require(`axios`);
 const {HttpMethod} = require(`../constants`);
@@ -53,6 +53,13 @@ class API {
 
   createComment(id, data) {
     return this._load(`/articles/${id}/comments`, {
+      method: HttpMethod.POST,
+      data
+    });
+  }
+
+  createUser(data) {
+    return this._load(`/user`, {
       method: HttpMethod.POST,
       data
     });
