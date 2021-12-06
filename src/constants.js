@@ -64,3 +64,4 @@ module.exports.TO_SQL_FILE = {
   TRUE: true,
   FALSE: false
 };
+module.exports.MAX_DAY_COUNT = 7;

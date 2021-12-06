@@ -3,6 +3,8 @@
 const chalk = require(`chalk`);
 const fs = require(`fs`).promises;
 
+const {MAX_DAY_COUNT} = require(`./constants`);
+
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -32,7 +34,7 @@ module.exports.getPictureFileName = (number) => `item${number.toString().padStar
 module.exports.getRandomDate = () => {
   const getOtherDate = () => {
     const date = new Date();
-    const diffValue = getRandomInt(0, 7);
+    const diffValue = getRandomInt(0, MAX_DAY_COUNT);
 
     date.setDate(date.getDate() + diffValue);
     return date;
