@@ -26,10 +26,10 @@ block content
             .form__field
               label
                 input(type='password' name='repeat-password' placeholder='Повтор пароля' required='')
-            .form__validation-error
-              p.form__error-message При регистрации произошли ошибки:
-              ul.form__errors
-                if validationMessages
+            if validationMessages
+              .form__validation-error
+                p.form__error-message При регистрации произошли ошибки:
+                ul.form__errors
                   each message in validationMessages
                     li.form__error #{message}
             .form__image-loader

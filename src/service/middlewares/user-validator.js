@@ -67,7 +67,7 @@ module.exports = (service) => async (req, res, next) => {
       .send(error.details.map((err) => err.message).join(`\n`));
   }
 
-  const userByEmail = service.findByEmail(req.body.email);
+  const userByEmail = await service.findByEmail(req.body.email);
 
   if (userByEmail) {
     return res

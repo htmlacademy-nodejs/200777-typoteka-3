@@ -10,7 +10,7 @@ class UserService {
     return user.get();
   }
 
-  async findOne(email) {
+  async findByEmail(email) {
     const user = await this._User.findOne({
       where: {email}
     });

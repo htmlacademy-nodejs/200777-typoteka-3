@@ -39,10 +39,6 @@ module.exports = async (sequelize, {categories, articles, users}) => {
         )
     );
   });
-  try {
-    await Promise.all(articlePromises);
-  } catch (error) {
-    console.log(error);
-  }
-  
+
+  await Promise.all(articlePromises);
 };

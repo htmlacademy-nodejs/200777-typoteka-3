@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-"use strict";
+'use strict';
 
 // логика выбора даты в календаре
 
