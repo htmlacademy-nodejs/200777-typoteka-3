@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const Joi = require(`joi`);
 
@@ -12,7 +12,8 @@ const ErrorArticleMessage = {
   ANNOUNCE_MAX: `Аннонс не может содержать более 250 символов`,
   FULLTEXT_MAX: `Полный текст не может содержать более 1000 символов`,
   CATEGORIES: `Не выбрана ни одна категория статьи`,
-  PUBLICATION_DATE_FORMAT: `Дата публикации не передана или формат некорректен`
+  PUBLICATION_DATE_FORMAT: `Дата публикации не передана или формат некорректен`,
+  USER_ID: `Некорректный идентификатор пользователя`
 };
 
 const schema = Joi.object({
@@ -57,7 +58,15 @@ const schema = Joi.object({
     .min(1)
     .required(),
   picture: Joi
-    .string()
+    .string(),
+  userId: Joi
+    .number()
+    .integer()
+    .positive()
+    .required()
+    .messages({
+      'number.base': ErrorArticleMessage.USER_ID
+    })
 });
 
 module.exports = (req, res, next) => {

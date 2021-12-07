@@ -4,9 +4,10 @@ const express = require(`express`);
 const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
 
-const articles = require(`./articles`);
-const DataService = require(`../data-service/articles`);
-const CommentsService = require(`../data-service/comments`);
+const article = require(`./article`);
+const DataService = require(`../data-service/article`);
+const CommentService = require(`../data-service/comment`);
+const passwordUtils = require(`../lib/password`);
 
 const {HttpCode} = require(`../../constants`);
 const initDB = require(`../lib/init-db`);
@@ -18,8 +19,25 @@ const mockCategories = [
   `Программирование`
 ];
 
+const mockUsers = [
+  {
+    email: `ivanov@example.com`,
+    passwordHash: passwordUtils.hashSync(`ivanov`),
+    name: `Иван`,
+    surname: `Иванов`,
+    avatar: `avatar1.jpg`
+  }, {
+    email: `petrov@example.com`,
+    passwordHash: passwordUtils.hashSync(`petrov`),
+    name: `Пётр`,
+    surname: `Петров`,
+    avatar: `avatar2.jpg`
+  }
+];
+
 const mockArticles = [
   {
+    "user": `ivanov@example.com`,
     "title": `Лучшие рок-музыканты 20-века`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Из под его пера вышло 8 платиновых альбомов. Простые ежедневные упражнения помогут достичь успеха.`,
@@ -32,11 +50,13 @@ const mockArticles = [
     ],
     "comments": [
       {
+        "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-) Планируете записать видосик на эту тему? Совсем немного...`
       }
     ]
   },
   {
+    "user": `petrov@example.com`,
     "title": `Другой пост`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Бороться с прокрастинацией несложно.`,
@@ -48,20 +68,25 @@ const mockArticles = [
     ],
     "comments": [
       {
+        "user": `petrov@example.com`,
         "text": `Согласен с автором!`
       },
       {
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-) Согласен с автором! Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       },
       {
+        "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-)`
       },
       {
+        "user": `ivanov@example.com`,
         "text": `Это где ж такие красоты? Мне кажется или я уже читал это где-то? Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       }
     ]
   },
   {
+    "user": `petrov@example.com`,
     "title": `Что такое золотое сечение`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
@@ -70,11 +95,13 @@ const mockArticles = [
     "categories": [`Без рамки`],
     "comments": [
       {
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-)`
       }
     ]
   },
   {
+    "user": `petrov@example.com`,
     "title": `Борьба с прокрастинацией`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Первая большая ёлка была установлена только в 1938 году. Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Он написал больше 30 хитов.`,
@@ -83,14 +110,17 @@ const mockArticles = [
     "categories": [`Программирование`],
     "comments": [
       {
+        "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-)`
       },
       {
+        "user": `ivanov@example.com`,
         "text": `Планируете записать видосик на эту тему?`
       }
     ]
   },
   {
+    "user": `ivanov@example.com`,
     "title": `Как начать программировать`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
@@ -99,6 +129,7 @@ const mockArticles = [
     "categories": [`Программирование`, `Разное`],
     "comments": [
       {
+        "user": `petrov@example.com`,
         "text": `Планируете записать видосик на эту тему? Плюсую но слишком много буквы!`
       }
     ]
@@ -107,10 +138,10 @@ const mockArticles = [
 
 const createAPI = async () => {
   const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
-  await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
+  await initDB(mockDB, {categories: mockCategories, articles: mockArticles, users: mockUsers});
   const app = express();
   app.use(express.json());
-  articles(app, new DataService(mockDB), new CommentsService(mockDB));
+  article(app, new DataService(mockDB), new CommentService(mockDB));
   return app;
 };
 
@@ -185,7 +216,8 @@ describe(`API creates an article when data is valid`, () => {
     publicationDate: `2021-11-17T15:53:11.237Z`,
     announce: `Новый аннонс. Но будет валиден, если будет побольше букв.`,
     fullText: `Всё валидно. Пост будет создан и отображён при проверке :)`,
-    categories: [3, 4]
+    categories: [3, 4],
+    userId: 1
   };
 
   let app;
@@ -216,7 +248,8 @@ describe(`API refuses to create an article if data is invalid`, () => {
     title: `Этот артикл. Много-много слов. Целых 30+`,
     publicationDate: `2021-11-17T15:53:11.237Z`,
     announce: `не будет здесь много слов. Но больше 30 точно`,
-    categories: [2, 3]
+    categories: [2, 3],
+    userId: 2
   };
 
   let app;
@@ -275,7 +308,8 @@ describe(`API refuses to create an article if data is invalid`, () => {
 
 describe(`API creates a comment if data is valid`, () => {
   const newComment = {
-    text: `Комментарий валиден!`
+    text: `Комментарий валиден! К лотку приучен`,
+    userId: 1
   };
 
   let app;
@@ -312,9 +346,13 @@ test(`API refuses to create a comment to non-existent article and returns code 4
 test(`API refuses to create a comment when data is invalid and returns status code 400`, async () => {
   const app = await createAPI();
 
+  const invalidComment = {
+    text: `Нет поля userId, поэтому приложение не создаст этот комментарий.`
+  };
+
   return request(app)
     .post(`/articles/1/comments`)
-    .send({})
+    .send(invalidComment)
     .expect(HttpCode.BAD_REQUEST);
 });
 
@@ -323,9 +361,10 @@ describe(`API changes existent article`, () => {
   const newArticleData = {
     title: `Новые данные. Нужно побольше текста`,
     publicationDate: `2021-11-17T15:53:11.237Z`,
-    announce: `Аннонс! Это длинный текст. Очень!`,
+    announce: `Аннонс! Это длинный текст. Очень! Много слов`,
     fullText: `артикла`,
     categories: [2, 3],
+    userId: 2
   };
 
   let app;
@@ -352,6 +391,7 @@ test(`API returns status code 404 when trying to change non-existing article wit
     publicationDate: `2021-11-17T15:53:11.237Z`,
     announce: `Нужно, чтобы здесь было более 30 символов. Мы это сделали!`,
     categories: [2, 4],
+    userId: 1
   };
 
   const app = await createAPI();
@@ -368,6 +408,7 @@ test(`API returns status code 400 when trying to change non-existing article wit
     title: `Не хватает полей! But we will try to change it!`,
     announce: `publicationDate field is not existent! But we can try`,
     categories: [4],
+    userId: 1
   };
 
   const app = await createAPI();

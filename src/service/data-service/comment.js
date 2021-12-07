@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
-class CommentsService {
+class CommentService {
   constructor(sequelize) {
     this._Article = sequelize.models.Article;
     this._Comment = sequelize.models.Comment;
   }
 
-  findAll(articleId) {
+  async findAll(articleId) {
     return this._Comment.findAll({
       where: {articleId},
       raw: true
@@ -28,4 +28,4 @@ class CommentsService {
   }
 }
 
-module.exports = CommentsService;
+module.exports = CommentService;

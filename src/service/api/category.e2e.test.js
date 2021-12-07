@@ -4,9 +4,10 @@ const express = require(`express`);
 const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
 
-const categories = require(`./categories`);
-const DataService = require(`../data-service/categories`);
+const category = require(`./category`);
+const DataService = require(`../data-service/category`);
 const {HttpCode} = require(`../../constants`);
+const passwordUtils = require(`../lib/password`);
 
 const initDB = require(`../lib/init-db`);
 
@@ -17,8 +18,25 @@ const mockCategories = [
   `Программирование`
 ];
 
+const mockUsers = [
+  {
+    email: `ivanov@example.com`,
+    passwordHash: passwordUtils.hashSync(`ivanov`),
+    name: `Иван`,
+    surname: `Иванов`,
+    avatar: `avatar1.jpg`
+  }, {
+    email: `petrov@example.com`,
+    passwordHash: passwordUtils.hashSync(`petrov`),
+    name: `Пётр`,
+    surname: `Петров`,
+    avatar: `avatar2.jpg`
+  }
+];
+
 const mockArticles = [
   {
+    "user": `petrov@example.com`,
     "title": `Лучшие рок-музыканты 20-века`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Из под его пера вышло 8 платиновых альбомов. Простые ежедневные упражнения помогут достичь успеха.`,
@@ -31,11 +49,13 @@ const mockArticles = [
     ],
     "comments": [
       {
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-) Планируете записать видосик на эту тему? Совсем немного...`
       }
     ]
   },
   {
+    "user": `petrov@example.com`,
     "title": `Другой пост`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Бороться с прокрастинацией несложно.`,
@@ -47,20 +67,25 @@ const mockArticles = [
     ],
     "comments": [
       {
+        "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-) Согласен с автором! Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       },
       {
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-)`
       },
       {
+        "user": `petrov@example.com`,
         "text": `Согласен с автором!`
       },
       {
+        "user": `ivanov@example.com`,
         "text": `Это где ж такие красоты? Мне кажется или я уже читал это где-то? Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       }
     ]
   },
   {
+    "user": `ivanov@example.com`,
     "title": `Что такое золотое сечение`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
@@ -69,11 +94,13 @@ const mockArticles = [
     "categories": [`Без рамки`],
     "comments": [
       {
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-)`
       }
     ]
   },
   {
+    "user": `ivanov@example.com`,
     "title": `Борьба с прокрастинацией`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Первая большая ёлка была установлена только в 1938 году. Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Он написал больше 30 хитов.`,
@@ -82,14 +109,17 @@ const mockArticles = [
     "categories": [`Программирование`],
     "comments": [
       {
+        "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-)`
       },
       {
+        "user": `petrov@example.com`,
         "text": `Планируете записать видосик на эту тему?`
       }
     ]
   },
   {
+    "user": `petrov@example.com`,
     "title": `Как начать программировать`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
@@ -98,6 +128,7 @@ const mockArticles = [
     "categories": [`Программирование`, `Разное`],
     "comments": [
       {
+        "user": `ivanov@example.com`,
         "text": `Планируете записать видосик на эту тему? Плюсую но слишком много буквы!`
       }
     ]
@@ -110,8 +141,8 @@ const app = express();
 app.use(express.json());
 
 beforeAll(async () => {
-  await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
-  categories(app, new DataService(mockDB));
+  await initDB(mockDB, {categories: mockCategories, articles: mockArticles, users: mockUsers});
+  category(app, new DataService(mockDB));
 });
 
 

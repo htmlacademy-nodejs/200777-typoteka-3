@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const sequelize = require(`../lib/sequelize`);
 const {getLogger} = require(`../lib/logger`);
@@ -6,31 +6,18 @@ const initDatabase = require(`../lib/init-db`);
 
 const logger = getLogger({});
 
-const {
-  getRandomInt,
-  shuffle,
-  readContent,
-  getPictureFileName,
-  getRandomDate,
-  getRandomArray
-} = require(`../../utils`);
+const {readContent} = require(`../../utils`);
 
 const {
   ExitCode,
   FilePath,
   ArticlesCount,
-  AnnounceRestrict,
-  FullTextRestrict,
-  PictureRestrict,
-  CommentsCountRestrict,
-  CommentSentencesMaxCount,
-  USER_ID_MIN,
-  CATEGORY_MIN_COUNT
+  TO_SQL_FILE
 } = require(`../../constants`);
 
-const users = require(`../../users`);
+const users = require(`./generate-articles/users`);
 
-const {generateArticles} = require(`../../generate-articles`);
+const {generateArticles} = require(`./generate-articles`);
 
 module.exports = {
   name: `--filldb`,
@@ -43,48 +30,16 @@ module.exports = {
       process.exit(ExitCode.ERROR);
     }
     logger.info(`Connection to database established`);
-
-    const [
-      titles,
-      categories,
-      sentences,
-      commentSentences
-    ] = await Promise.all([
-      readContent(FilePath.TITLES),
-      readContent(FilePath.CATEGORIES),
-      readContent(FilePath.SENTENCES),
-      readContent(FilePath.COMMENTS)
-    ]);
-
     const [count] = args;
     const countArticles = Number.parseInt(count, 10) || ArticlesCount.DEFAULT;
 
+    const categories = await readContent(FilePath.CATEGORIES);
 
-    const articles = generateArticles(
-        countArticles,
-        titles,
-        sentences,
-        commentSentences,
-        categories.length,
-        users.length,
-        {
-          getRandomInt,
-          shuffle,
-          getPictureFileName,
-          getRandomDate,
-          getRandomArray
-        },
-        {
-          AnnounceRestrict,
-          FullTextRestrict,
-          PictureRestrict,
-          CommentsCountRestrict,
-          CommentSentencesMaxCount,
-          USER_ID_MIN,
-          CATEGORY_MIN_COUNT,
-        }
+    const articles = await generateArticles(
+        TO_SQL_FILE.FALSE,
+        countArticles
     );
 
-    return initDatabase(sequelize, {categories, articles});
+    return initDatabase(sequelize, {categories, articles, users});
   }
 };

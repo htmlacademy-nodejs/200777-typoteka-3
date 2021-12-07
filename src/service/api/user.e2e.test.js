@@ -4,12 +4,12 @@ const express = require(`express`);
 const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
 
-const search = require(`./search`);
-const DataService = require(`../data-service/search`);
-const {HttpCode} = require(`../../constants`);
+const user = require(`./user`);
+const DataService = require(`../data-service/user`);
 const passwordUtils = require(`../lib/password`);
-
 const initDB = require(`../lib/init-db`);
+
+const {HttpCode} = require(`../../constants`);
 
 const mockCategories = [
   `Музыка`,
@@ -68,15 +68,15 @@ const mockArticles = [
     "comments": [
       {
         "user": `ivanov@example.com`,
+        "text": `Согласен с автором!`
+      },
+      {
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-) Согласен с автором! Мне не нравится ваш стиль. Ощущение что вы меня поучаете.`
       },
       {
         "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-)`
-      },
-      {
-        "user": `petrov@example.com`,
-        "text": `Согласен с автором!`
       },
       {
         "user": `ivanov@example.com`,
@@ -85,7 +85,7 @@ const mockArticles = [
     ]
   },
   {
-    "user": `petrov@example.com`,
+    "user": `ivanov@example.com`,
     "title": `Что такое золотое сечение`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
@@ -94,13 +94,13 @@ const mockArticles = [
     "categories": [`Без рамки`],
     "comments": [
       {
-        "user": `ivanov@example.com`,
+        "user": `petrov@example.com`,
         "text": `Хочу такую же футболку :-)`
       }
     ]
   },
   {
-    "user": `ivanov@example.com`,
+    "user": `petrov@example.com`,
     "title": `Борьба с прокрастинацией`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Первая большая ёлка была установлена только в 1938 году. Помните небольшое количество ежедневных упражнений лучше чем один раз но много. Он написал больше 30 хитов.`,
@@ -109,17 +109,17 @@ const mockArticles = [
     "categories": [`Программирование`],
     "comments": [
       {
-        "user": `petrov@example.com`,
+        "user": `ivanov@example.com`,
         "text": `Хочу такую же футболку :-)`
       },
       {
-        "user": `ivanov@example.com`,
+        "user": `petrov@example.com`,
         "text": `Планируете записать видосик на эту тему?`
       }
     ]
   },
   {
-    "user": `petrov@example.com`,
+    "user": `ivanov@example.com`,
     "title": `Как начать программировать`,
     "publicationDate": `2021-11-17T15:53:11.237Z`,
     "announce": `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
@@ -135,47 +135,104 @@ const mockArticles = [
   }
 ];
 
-
-const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
-
-const app = express();
-app.use(express.json());
-
-beforeAll(async () => {
+const createAPI = async () => {
+  const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
   await initDB(mockDB, {categories: mockCategories, articles: mockArticles, users: mockUsers});
-  search(app, new DataService(mockDB));
-});
+  const app = express();
+  app.use(express.json());
+  user(app, new DataService(mockDB));
+  return app;
+};
 
+describe(`API creates user if data is valid`, () => {
+  const validUserData = {
+    name: `Сидор`,
+    surname: `Сидоров`,
+    email: `sidorov@example.com`,
+    password: `sidorov`,
+    passwordRepeated: `sidorov`,
+    avatar: `sidorov.jpg`
+  };
 
-describe(`API returns offer based on search query`, () => {
   let response;
 
   beforeAll(async () => {
+    let app = await createAPI();
     response = await request(app)
-      .get(`/search`)
-      .query({
-        query: `золотое сечение`
-      });
+      .post(`/user`)
+      .send(validUserData);
   });
 
-  test(`Status code is 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+  test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
 
-  test(`1 article found`, () => expect(response.body.length).toBe(1));
-
-  test(`Article has correct title`, () => expect(response.body[0].title).toBe(`Что такое золотое сечение`));
 });
 
-test(`API returns code 404 if nothing is found`,
-    () => request(app)
-      .get(`/search`)
-      .query({
-        query: `Не найдёшь меня!`
-      })
-      .expect(HttpCode.NOT_FOUND)
-);
+describe(`API refuses to create user if data is invalid`, () => {
+  const validUserData = {
+    name: `Сидор`,
+    surname: `Сидоров`,
+    email: `sidorov@example.com`,
+    password: `sidorov`,
+    passwordRepeated: `sidorov`,
+    avatar: `sidorov.jpg`
+  };
 
-test(`API returns 400 when query string is absent`,
-    () => request(app)
-        .get(`/search`)
-        .expect(HttpCode.BAD_REQUEST)
-);
+  let app;
+
+  beforeAll(async () => {
+    app = await createAPI();
+  });
+
+  test(`Without any required property response code is 400`, async () => {
+    for (const key of Object.keys(validUserData)) {
+      const badUserData = {...validUserData};
+      delete badUserData[key];
+      await request(app)
+        .post(`/user`)
+        .send(badUserData)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field type is wrong response code is 400`, async () => {
+    const badUsers = [
+      {...validUserData, name: true},
+      {...validUserData, email: 1}
+    ];
+    for (const badUserData of badUsers) {
+      await request(app)
+        .post(`/user`)
+        .send(badUserData)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field value is wrong response code is 400`, async () => {
+    const badUsers = [
+      {...validUserData, password: `short`, passwordRepeated: `short`},
+      {...validUserData, email: `invalid`}
+    ];
+    for (const badUserData of badUsers) {
+      await request(app)
+        .post(`/user`)
+        .send(badUserData)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When password and passwordRepeated are not equal, code is 400`, async () => {
+    const badUserData = {...validUserData, passwordRepeated: `not sidorov`};
+    await request(app)
+      .post(`/user`)
+      .send(badUserData)
+      .expect(HttpCode.BAD_REQUEST);
+  });
+
+  test(`When email is already in use status code is 400`, async () => {
+    const badUserData = {...validUserData, email: `ivanov@example.com`};
+    await request(app)
+      .post(`/user`)
+      .send(badUserData)
+      .expect(HttpCode.BAD_REQUEST);
+  });
+});
