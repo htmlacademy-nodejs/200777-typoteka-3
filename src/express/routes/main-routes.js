@@ -3,6 +3,7 @@
 const {Router} = require(`express`);
 
 const upload = require(`../middlewares/upload`);
+const auth = require(`../middlewares/auth`);
 const {HttpCode} = require(`../../constants`);
 const {prepareErrors} = require(`../../utils`);
 const api = require(`../api`).getAPI();
@@ -61,7 +62,7 @@ mainRouter.get(`/search`, async (req, res) => {
   }
 });
 
-mainRouter.get(`/categories`, (req, res) => {
+mainRouter.get(`/categories`, auth, (req, res) => {
   const {user} = req.session;
   res.render(`all-categories`, {user});
 });

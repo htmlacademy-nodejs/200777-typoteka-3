@@ -3,6 +3,7 @@
 const {Router} = require(`express`);
 
 const upload = require(`../middlewares/upload`);
+const auth = require(`../middlewares/auth`);
 const {prepareErrors} = require(`../../utils`);
 
 const api = require(`../api`).getAPI();
@@ -35,7 +36,7 @@ const getViewArticleData = async (id, needComments) => {
 };
 
 
-articlesRouter.get(`/add`, async (req, res) => {
+articlesRouter.get(`/add`, auth, async (req, res) => {
   const {user} = req.session;
   const {url} = req;
   const categories = await getAddArticleData();
@@ -55,7 +56,7 @@ articlesRouter.get(`/category/:categoryId`, (req, res) => {
 });
 
 
-articlesRouter.get(`/edit/:id`, async (req, res) => {
+articlesRouter.get(`/edit/:id`, auth, async (req, res) => {
   const {user} = req.session;
   const {url} = req;
   const {id} = req.params;
@@ -74,7 +75,7 @@ articlesRouter.get(`/:id`, async (req, res) => {
 });
 
 
-articlesRouter.post(`/add`, upload.single(`upload`), async (req, res) => {
+articlesRouter.post(`/add`, auth, upload.single(`upload`), async (req, res) => {
   const {user} = req.session;
   const {body, file} = req;
 
