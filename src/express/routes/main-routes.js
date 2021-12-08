@@ -3,6 +3,7 @@
 const {Router} = require(`express`);
 
 const upload = require(`../middlewares/upload`);
+const auth = require(`../middlewares/auth`);
 const {HttpCode} = require(`../../constants`);
 const {prepareErrors} = require(`../../utils`);
 const api = require(`../api`).getAPI();
@@ -12,6 +13,7 @@ const ARTICLES_PER_PAGE = 8;
 const mainRouter = new Router();
 
 mainRouter.get(`/`, async (req, res) => {
+  const {user} = req.session;
   let {page = 1} = req.query;
   page = +page;
 
@@ -28,13 +30,20 @@ mainRouter.get(`/`, async (req, res) => {
   ]);
 
   const totalPages = Math.ceil(count / ARTICLES_PER_PAGE);
-  res.render(`main`, {articles, page, totalPages, categories});
+  res.render(`main`, {articles, page, totalPages, categories, user});
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
 mainRouter.get(`/login`, (req, res) => res.render(`login`));
 
+mainRouter.get(`/logout`, (req, res) => {
+  delete req.session.user;
+  res.redirect(`/`);
+});
+
 mainRouter.get(`/search`, async (req, res) => {
+  const {user} = req.session;
+
   try {
     const {search} = req.query;
     const results = await api.search(search);
@@ -43,17 +52,20 @@ mainRouter.get(`/search`, async (req, res) => {
     switch (error.response.status) {
 
       case HttpCode.NOT_FOUND:
-        res.render(`search`, {results: []});
+        res.render(`search`, {results: [], user});
         break;
 
       default:
-        res.render(`search`, {results: false});
+        res.render(`search`, {results: false, user});
         break;
     }
   }
 });
 
-mainRouter.get(`/categories`, (req, res) => res.render(`all-categories`));
+mainRouter.get(`/categories`, auth, (req, res) => {
+  const {user} = req.session;
+  res.render(`all-categories`, {user});
+});
 
 mainRouter.post(`/register`, upload.single(`upload`), async (req, res) => {
   const {body, file} = req;
@@ -70,8 +82,24 @@ mainRouter.post(`/register`, upload.single(`upload`), async (req, res) => {
     await api.createUser(userData);
     res.redirect(`/login`);
   } catch (errors) {
+    const {user} = req.session;
     const validationMessages = prepareErrors(errors);
-    res.render(`sign-up`, {validationMessages});
+    res.render(`sign-up`, {validationMessages, user});
+  }
+});
+
+mainRouter.post(`/login`, async (req, res) => {
+  try {
+    const {email, password} = req.body;
+    const user = await api.auth(email, password);
+    req.session.user = user;
+    req.session.save(() => {
+      res.redirect(`/`);
+    });
+  } catch (errors) {
+    const validationMessages = prepareErrors(errors);
+    const {user} = req.session;
+    res.render(`login`, {user, validationMessages});
   }
 });
 
