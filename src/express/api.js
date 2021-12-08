@@ -59,6 +59,7 @@ class API {
   }
 
   createUser(data) {
+    console.log(data);
     return this._load(`/user`, {
       method: HttpMethod.POST,
       data

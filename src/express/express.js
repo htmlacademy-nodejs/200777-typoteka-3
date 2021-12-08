@@ -59,7 +59,7 @@ app.use((req, res) => res
   .render(`errors/404`));
 
 app.use((err, req, res, _next) => {
-  console.log(`Error! 500`, err.message);
+  console.log(`Error! 500`, err);
 
   res
     .status(HttpCode.INTERNAL_SERVER_ERROR)

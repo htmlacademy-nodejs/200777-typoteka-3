@@ -68,7 +68,6 @@ mainRouter.get(`/categories`, auth, (req, res) => {
 });
 
 mainRouter.post(`/register`, upload.single(`upload`), async (req, res) => {
-  const {user} = req.session;
   const {body, file} = req;
   const userData = {
     name: body.name,
@@ -79,13 +78,12 @@ mainRouter.post(`/register`, upload.single(`upload`), async (req, res) => {
     avatar: file.filename
   };
 
-  console.log(`Hello! `, userData);
-
   try {
     await api.createUser(userData);
     res.redirect(`/login`);
   } catch (errors) {
     console.log(`Kucha errorov `, errors);
+    const {user} = req.session;
     const validationMessages = prepareErrors(errors);
     res.render(`sign-up`, {validationMessages, user});
   }
