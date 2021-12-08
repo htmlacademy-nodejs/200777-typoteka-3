@@ -5,15 +5,17 @@ const api = require(`../api`).getAPI();
 const myRouter = new Router();
 
 myRouter.get(`/`, async (req, res) => {
+  const {user} = req.session;
   const articles = await api.getArticles();
 
-  res.render(`my`, {articles});
+  res.render(`my`, {articles, user});
 });
 
 myRouter.get(`/comments`, async (req, res) => {
+  const {user} = req.session;
   const articles = await api.getArticles();
 
-  res.render(`comments`, {comments: articles[0].comments});
+  res.render(`comments`, {comments: articles[0].comments, user});
 });
 
 module.exports = myRouter;
