@@ -9,7 +9,7 @@
     "eslint": "eslint --ext .js src/",
     "start": "cross-env LOG_LEVEL=error NODE_ENV=production node -r dotenv/config ./src/service/service.js",
     "start::debug": "cross-env LOG_LEVEL=info NODE_ENV=development node -r dotenv/config ./src/service/service.js",
-    "start-front-server": "nodemon ./src/express/express.js",
+    "start-front-server": "node -r dotenv/config ./src/express/express.js",
     "server": "nodemon ./src/service/service.js --server"
   },
   "repository": {
@@ -35,9 +35,11 @@
   "dependencies": {
     "axios": "0.21.1",
     "bcrypt": "5.0.1",
+    "connect-session-sequelize": "7.1.2",
     "cross-env": "7.0.3",
     "dotenv": "10.0.0",
     "express": "4.17.1",
+    "express-session": "1.17.2",
     "joi": "17.4.2",
     "multer": "1.4.3",
     "nanoid": "3.1.23",
