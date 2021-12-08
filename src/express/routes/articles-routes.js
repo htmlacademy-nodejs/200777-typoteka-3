@@ -84,7 +84,8 @@ articlesRouter.post(`/add`, upload.single(`upload`), async (req, res) => {
     announce: body.announcement,
     fullText: body[`full-text`],
     categories: Object.keys(body.categories).map((id) => +id.replace(/'/g, ``)),
-    picture: file ? file.filename : ``
+    picture: file ? file.filename : ``,
+    userId: user.id
   };
 
   try {
