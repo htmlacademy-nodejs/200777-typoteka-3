@@ -15,6 +15,7 @@ module.exports = {
         --help:               печатает этот текст
         --filldb <count>      заполняет БД
         --full <count>        формирует файл fill-db.sql
+        --server              запускает сервер
       `;
 
     console.log(chalk.gray(text));
